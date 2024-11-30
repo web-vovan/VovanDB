@@ -24,17 +24,23 @@ func Parse(sql string) (SQLQuery, error) {
 	lexer := NewLexer(sql)
 
 	// Токены лексического анализа
-	tokens := lexer.Analyze()
-	// printTokens(tokens)
+	tokens, err := lexer.Analyze()
 
-	if tokens[0].Value == "SELECT" {
-		result, err := selectParser(tokens)
-
-		fmt.Println(result)
-		fmt.Println(err)
-
-		return result, err
+	if err != nil {
+		return nil, err
 	}
+	
+	printTokens(tokens)
 
-	return nil, fmt.Errorf("данный тип запроса пока не поддерживается %s", tokens[0].Value)
+	return nil, nil
+	// if tokens[0].Value == "SELECT" {
+	// 	result, err := selectParser(tokens)
+
+	// 	fmt.Println(result)
+	// 	fmt.Println(err)
+
+	// 	return result, err
+	// }
+
+	// return nil, fmt.Errorf("данный тип запроса пока не поддерживается %s", tokens[0].Value)
 }

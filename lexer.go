@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"strings"
 	"unicode"
 )
@@ -9,9 +10,10 @@ import (
 const (
 	TYPE_UNDEFINED = iota
 	TYPE_KEYWORD
-	TYPE_OPERATOR
-	TYPE_NUMBER
 	TYPE_STRING
+	TYPE_DIGIT
+	TYPE_OPERATOR
+	TYPE_SYMBOL
 )
 
 // Ключевые слова
@@ -19,6 +21,7 @@ var keywords = map[string]bool{
 	"SELECT": true,
 	"FROM":   true,
 	"WHERE":  true,
+	"AND":    true,
 }
 
 // Операторы
@@ -28,6 +31,14 @@ var operators = map[string]bool{
 	"<":  true,
 	">=": true,
 	"<=": true,
+}
+
+// Символы
+var symbols = map[string]bool{
+	"*": true,
+	",": true,
+	"(": true,
+	")": true,
 }
 
 type Lexer struct {
@@ -45,13 +56,11 @@ func NewLexer(input string) *Lexer {
 }
 
 // Лексический анализ
-func (l *Lexer) Analyze() []Token {
+func (l *Lexer) Analyze() ([]Token, error) {
 	var tokens []Token
 
 	for {
-		ch := l.current()
-
-		if l.isEndString() {
+		if l.isEnd() {
 			break
 		}
 
@@ -60,16 +69,20 @@ func (l *Lexer) Analyze() []Token {
 			continue
 		}
 
-		if unicode.IsLetter(ch) {
+		if l.isString() {
 			tokens = append(tokens, l.getStringToken())
-		} else if unicode.IsDigit(ch) {
-			tokens = append(tokens, l.getNumberToken())
-		} else {
+		} else if l.isDigit() {
+			tokens = append(tokens, l.getDigitToken())
+		} else if l.isOperator() {
 			tokens = append(tokens, l.getOperatorToken())
+		} else if l.isSymbol() {
+			tokens = append(tokens, l.getSymbolToken())
+		} else {
+			return nil, fmt.Errorf("неизвестный символ %s в позиции %d", string(l.current()), l.Position)
 		}
 	}
 
-	return tokens
+	return tokens, nil
 }
 
 // Получение текущего символа и переход к следующему
@@ -92,21 +105,41 @@ func (l *Lexer) current() rune {
 	return l.Ch
 }
 
-// Текущий символ является пробелом
+// Проверка текущего символа на пробел
 func (l *Lexer) isSpace() bool {
 	return unicode.IsSpace(l.current())
 }
 
-// Конец строки для парсинга
-func (l *Lexer) isEndString() bool {
-	return l.Ch == 0
+// Проверка текущего символа на строку
+func (l *Lexer) isString() bool {
+	return unicode.IsLetter(l.current())
+}
+
+// Проверка текущего символа на число
+func (l *Lexer) isDigit() bool {
+	return unicode.IsDigit(l.current())
+}
+
+// Проверка текущего символа на оператор
+func (l *Lexer) isOperator() bool {
+	return operators[string(l.current())]
+}
+
+// Проверка текущего символа на символ
+func (l *Lexer) isSymbol() bool {
+	return symbols[string(l.current())]
+}
+
+// Проверка текущего символа на конец строки
+func (l *Lexer) isEnd() bool {
+	return l.current() == 0
 }
 
 // Получение строкового токена
 func (l *Lexer) getStringToken() Token {
 	var builder strings.Builder
 
-	for unicode.IsLetter(l.current()) {
+	for l.isString() {
 		builder.WriteRune(l.next())
 	}
 
@@ -117,7 +150,7 @@ func (l *Lexer) getStringToken() Token {
 	// Проверка на ключевое слово
 	if keywords[strings.ToUpper(result)] {
 		tokenType = TYPE_KEYWORD
-        result = strings.ToUpper(result)
+		result = strings.ToUpper(result)
 	} else {
 		tokenType = TYPE_STRING
 	}
@@ -129,28 +162,43 @@ func (l *Lexer) getStringToken() Token {
 }
 
 // Получение числового токена
-func (l *Lexer) getNumberToken() Token {
+func (l *Lexer) getDigitToken() Token {
 	var builder strings.Builder
 
-	for unicode.IsDigit(l.current()) {
+	for l.isDigit() {
 		builder.WriteRune(l.next())
 	}
 
 	return Token{
-		Type:  TYPE_NUMBER,
+		Type:  TYPE_DIGIT,
 		Value: builder.String(),
 	}
 }
 
+// Получение токена оператора
 func (l *Lexer) getOperatorToken() Token {
 	var builder strings.Builder
 
-	for operators[string(l.current())] {
+	for l.isOperator() {
 		builder.WriteRune(l.next())
 	}
 
 	return Token{
 		Type:  TYPE_OPERATOR,
+		Value: builder.String(),
+	}
+}
+
+// Получение токена символа
+func (l *Lexer) getSymbolToken() Token {
+	var builder strings.Builder
+
+	for l.isSymbol() {
+		builder.WriteRune(l.next())
+	}
+
+	return Token{
+		Type:  TYPE_SYMBOL,
 		Value: builder.String(),
 	}
 }
