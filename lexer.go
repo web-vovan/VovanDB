@@ -10,11 +10,24 @@ import (
 const (
 	TYPE_UNDEFINED = iota
 	TYPE_KEYWORD
-	TYPE_STRING
+	TYPE_IDENTIFIER
 	TYPE_DIGIT
+	TYPE_STRING
+	TYPE_BOOL
 	TYPE_OPERATOR
 	TYPE_SYMBOL
 )
+
+var typeNames = map[int]string{
+	TYPE_UNDEFINED:  "TYPE_UNDEFINED",
+	TYPE_KEYWORD:    "TYPE_KEYWORD",
+	TYPE_IDENTIFIER: "TYPE_IDENTIFIER",
+	TYPE_DIGIT:      "TYPE_DIGIT",
+	TYPE_STRING:     "TYPE_STRING",
+	TYPE_BOOL:       "TYPE_BOOL",
+	TYPE_OPERATOR:   "TYPE_OPERATOR",
+	TYPE_SYMBOL:     "TYPE_SYMBOL",
+}
 
 // Ключевые слова
 var keywords = map[string]bool{
@@ -22,6 +35,12 @@ var keywords = map[string]bool{
 	"FROM":   true,
 	"WHERE":  true,
 	"AND":    true,
+}
+
+// Булевы выражения
+var bools = map[string]bool{
+	"TRUE":  true,
+	"FALSE": true,
 }
 
 // Операторы
@@ -71,6 +90,14 @@ func (l *Lexer) Analyze() ([]Token, error) {
 
 		if l.isString() {
 			tokens = append(tokens, l.getStringToken())
+		} else if l.isStringLiteral() {
+			token, err := l.getStringLiteralToken()
+
+			if err != nil {
+				return nil, err
+			}
+
+			tokens = append(tokens, token)
 		} else if l.isDigit() {
 			tokens = append(tokens, l.getDigitToken())
 		} else if l.isOperator() {
@@ -130,6 +157,11 @@ func (l *Lexer) isSymbol() bool {
 	return symbols[string(l.current())]
 }
 
+// Проверка текущего символа на одинарную кавычку (в них строковые литералы)
+func (l *Lexer) isStringLiteral() bool {
+	return string(l.current()) == "'"
+}
+
 // Проверка текущего символа на конец строки
 func (l *Lexer) isEnd() bool {
 	return l.current() == 0
@@ -147,18 +179,54 @@ func (l *Lexer) getStringToken() Token {
 
 	var tokenType int
 
-	// Проверка на ключевое слово
 	if keywords[strings.ToUpper(result)] {
 		tokenType = TYPE_KEYWORD
 		result = strings.ToUpper(result)
+	} else if bools[strings.ToUpper(result)] {
+		tokenType = TYPE_BOOL
+		result = strings.ToUpper(result)
 	} else {
-		tokenType = TYPE_STRING
+		tokenType = TYPE_IDENTIFIER
 	}
 
 	return Token{
 		Type:  tokenType,
 		Value: result,
 	}
+}
+
+// Получение токена строкового литерала
+func (l *Lexer) getStringLiteralToken() (Token, error) {
+	var builder strings.Builder
+
+	if l.isStringLiteral() {
+		l.next()
+	}
+
+	hasEndStringLiteral := false
+
+	for {
+		if l.isEnd() {
+			break
+		}
+
+		if l.isStringLiteral() {
+			hasEndStringLiteral = true
+			l.next()
+			break
+		}
+
+		builder.WriteRune(l.next())
+	}
+
+	if !hasEndStringLiteral {
+		return Token{}, fmt.Errorf("отсутствует закрывающая кавычка для строки")
+	}
+
+	return Token{
+		Type:  TYPE_STRING,
+		Value: builder.String(),
+	}, nil
 }
 
 // Получение числового токена

@@ -27,7 +27,7 @@ func selectParser(tokens []Token) (SQLQuery, error) {
 	index := 1
 
     // Колонки
-    if tokens[index].Type == TYPE_STRING {
+    if tokens[index].Type == TYPE_IDENTIFIER {
         columns = append(columns, tokens[index].Value)
         index++
     } else {
@@ -53,7 +53,7 @@ func selectParser(tokens []Token) (SQLQuery, error) {
 
         index++
 
-        if tokens[index].Type != TYPE_STRING {
+        if tokens[index].Type != TYPE_IDENTIFIER {
             return nil, fmt.Errorf("в условии ожидается строка, вместо этого %d", tokens[index].Type)
         }
 
