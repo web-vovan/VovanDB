@@ -12,7 +12,7 @@ func (t Token) String() string {
 }
 
 func printTokens(tokens []Token) {
-    for _, token := range tokens {
-        fmt.Println(token)
-    }
+	for _, token := range tokens {
+		fmt.Println(token)
+	}
 }

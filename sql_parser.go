@@ -20,6 +20,8 @@ func Parse(sql string) (SQLQuery, error) {
 		return nil, err
 	}
 
+	// printTokens(tokens)
+
 	parser := NewParser(tokens)
 
 	if parser.isSelectQuery() {
