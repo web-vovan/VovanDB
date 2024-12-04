@@ -23,6 +23,12 @@ func selectParser(p *Parser) (SQLQuery, error) {
 	var table string
 	var conditions []Condition
 
+	if p.isSelectQuery() {
+		p.next()
+	} else {
+		return nil, fmt.Errorf("неверная структура запроса для select")
+	}
+
 	// Колонки
 	for p.isIdentifier() || p.isComma() || p.isAsterisk() {
 		if p.isComma() {
@@ -80,6 +86,14 @@ func selectParser(p *Parser) (SQLQuery, error) {
 	}
 
 	if len(conditions) == 0 {
+		return nil, fmt.Errorf("неверная структура запроса")
+	}
+
+	if p.isSemicolon() {
+		p.next()
+	}
+
+	if !p.isEnd() {
 		return nil, fmt.Errorf("неверная структура запроса")
 	}
 

@@ -35,6 +35,8 @@ var keywords = map[string]bool{
 	"FROM":   true,
 	"WHERE":  true,
 	"AND":    true,
+	"CREATE":    true,
+	"TABLE":    true,
 }
 
 // Булевы выражения
@@ -58,6 +60,7 @@ var symbols = map[string]bool{
 	",": true,
 	"(": true,
 	")": true,
+	";": true,
 }
 
 type Lexer struct {
@@ -259,14 +262,8 @@ func (l *Lexer) getOperatorToken() Token {
 
 // Получение токена символа
 func (l *Lexer) getSymbolToken() Token {
-	var builder strings.Builder
-
-	for l.isSymbol() {
-		builder.WriteRune(l.next())
-	}
-
 	return Token{
 		Type:  TYPE_SYMBOL,
-		Value: builder.String(),
+		Value: string(l.next()),
 	}
 }

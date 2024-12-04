@@ -1,6 +1,9 @@
 package parser
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // Парсер
 type Parser struct {
@@ -46,12 +49,13 @@ func (p *Parser) isEnd() bool {
 func (p *Parser) isSelectQuery() bool {
     t := p.current()
 
-    if (t.Type == TYPE_KEYWORD && t.Value == "SELECT") {
-        p.next()
-        return true
-    }
+    return t.Type == TYPE_KEYWORD && t.Value == "SELECT"
+}
 
-    return false
+func (p *Parser) isCreateQuery() bool {
+    t := p.current()
+
+    return t.Type == TYPE_KEYWORD && t.Value == "CREATE"
 }
 
 func (p *Parser) isIdentifier() bool {
@@ -59,6 +63,10 @@ func (p *Parser) isIdentifier() bool {
 }
 
 func (p *Parser) isOperator() bool {
+    return p.current().Type == TYPE_OPERATOR
+}
+
+func (p *Parser) isSymbol() bool {
     return p.current().Type == TYPE_OPERATOR
 }
 
@@ -78,12 +86,24 @@ func (p *Parser) isComma() bool {
     return p.current().Type == TYPE_SYMBOL && p.current().Value == ","
 }
 
+func (p *Parser) isSemicolon() bool {
+    return p.current().Type == TYPE_SYMBOL && p.current().Value == ";"
+}
+
 func (p *Parser) isAsterisk() bool {
     return p.current().Type == TYPE_SYMBOL && p.current().Value == "*"
 }
 
 func (p *Parser) isAndKeyword() bool {
     return p.current().Type == TYPE_KEYWORD && p.current().Value == "AND"
+}
+
+func (p *Parser) isOpenParen() bool {
+    return p.current().Type == TYPE_SYMBOL && p.current().Value == "("
+}
+
+func (p *Parser) isCloseParen() bool {
+    return p.current().Type == TYPE_SYMBOL && p.current().Value == ")"
 }
 
 func (p *Parser) getCondition() (Condition, error) {
@@ -115,5 +135,35 @@ func (p *Parser) getCondition() (Condition, error) {
         Operator: operator,
         Value: value,
         ValueType: valueType,
+    }, nil
+}
+
+func (p *Parser) getCreateColumn() (CreateColumn, error) {
+    nilCreateColumn := CreateColumn{}
+
+    // fmt.Println(p.current())
+    if !p.isIdentifier() {
+        fmt.Println(p.current())
+        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок 1")
+    }
+
+    name := p.next().Value
+
+    if !p.isIdentifier() {
+        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок 2")
+    }
+
+    
+    typeText := strings.ToUpper(p.next().Value)
+
+    columnType := columnTypes[typeText]
+
+    if columnType == 0 {
+        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок 3")
+    } 
+
+    return CreateColumn{
+        Name: name,
+        Type: columnType,
     }, nil
 }

@@ -8,7 +8,6 @@ type SQLQuery interface {
 	QueryType() string
 }
 
-
 func Parse(sql string) (SQLQuery, error) {
 	// Лексический анализатор
 	lexer := NewLexer(sql)
@@ -24,7 +23,14 @@ func Parse(sql string) (SQLQuery, error) {
 
 	parser := NewParser(tokens)
 
-	if parser.isSelectQuery() {
+	if parser.isCreateQuery() {
+		result, err := createParser(parser)
+
+		fmt.Println(result)
+		fmt.Println(err)
+
+		return result, err
+	} else if parser.isSelectQuery() {
 		result, err := selectParser(parser)
 
 		fmt.Println(result)
