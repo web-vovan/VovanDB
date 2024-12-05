@@ -1,9 +1,13 @@
-package parser
+package vovanDB
 
 import (
 	"fmt"
 	"strings"
 )
+
+type SQLQuery interface {
+	QueryType() string
+}
 
 // Парсер
 type Parser struct {
