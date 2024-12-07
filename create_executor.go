@@ -1,37 +1,45 @@
 package vovanDB
 
 import (
-    "fmt"
+	"fmt"
 )
 
-func createExecutor(s CreateQuery) error {
-    err := createValidator(s)
+func createExecutor(s CreateQuery) error { 
+    tableName := s.Table
 
-    if err != nil {
-        return err
-    }
+	err := createValidator(s)
 
-    fmt.Println("create executor")
+	if err != nil {
+		return err
+	}
 
-    return nil
+	// Создаем файлы таблицы
+	err = createTableFiles(tableName)
+
+	if err != nil {
+		return fmt.Errorf("не удалось создать файлы для таблицы: %s", tableName)
+	}
+
+	
+	return nil
 }
 
 func createValidator(s CreateQuery) error {
-    // Существование таблицы
-    if fileExists(getPathTableMeta(s.Table)) || fileExists(getPathTableData(s.Table)) {
-        return fmt.Errorf("невозможно создать таблицу %s, она уже существует", s.Table)
-    }
+	// Существование таблицы
+	if fileExists(getPathTableSchema(s.Table)) || fileExists(getPathTableData(s.Table)) {
+		return fmt.Errorf("невозможно создать таблицу %s, она уже существует", s.Table)
+	}
 
-    // Уникальность имен колонок
-    nameColumns := make(map[string]bool)
-    
-    for _, columns := range s.Columns {
-        if nameColumns[columns.Name] {
-            return fmt.Errorf("дубль колонки %s", columns.Name)
-        }
+	// Уникальность имен колонок
+	nameColumns := make(map[string]bool)
 
-        nameColumns[columns.Name] = true
-    }
+	for _, columns := range s.Columns {
+		if nameColumns[columns.Name] {
+			return fmt.Errorf("дубль колонки %s", columns.Name)
+		}
 
-    return nil
+		nameColumns[columns.Name] = true
+	}
+
+	return nil
 }
