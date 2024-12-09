@@ -25,6 +25,26 @@ func NewParser(tokens []Token) *Parser {
 	}
 }
 
+// Парсинг токенов
+func (p *Parser) parse() (SQLQuery, error) {
+    var sqlQuery SQLQuery
+    var err error
+
+	if p.isCreateQuery() {
+		sqlQuery, err = createParser(p)		
+	} else if p.isSelectQuery() {
+		sqlQuery, err = selectParser(p)
+	} else {
+		return sqlQuery, fmt.Errorf("данный тип запроса пока не поддерживается %s", p.Tokens[0].Value)
+	}
+
+	if err != nil {
+		return sqlQuery, err
+	}
+
+    return sqlQuery, nil
+}
+
 // Получение текущего токена
 func (p *Parser) current() Token {
 	return p.CurrentToken

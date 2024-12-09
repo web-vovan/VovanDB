@@ -1,9 +1,5 @@
 package vovanDB
 
-import (
-	"fmt"
-)
-
 func Execute(sql string) error {
 	// Лексический анализатор
 	lexer := NewLexer(sql)
@@ -15,26 +11,15 @@ func Execute(sql string) error {
 		return err
 	}
 
-	// printTokens(tokens)
-
 	// Парсер
 	parser := NewParser(tokens)
 
-	var sqlQuery SQLQuery
-
-	if parser.isCreateQuery() {
-		sqlQuery, err = createParser(parser)		
-	} else if parser.isSelectQuery() {
-		sqlQuery, err = selectParser(parser)
-	} else {
-		return fmt.Errorf("данный тип запроса пока не поддерживается %s", tokens[0].Value)
-	}
+	// Подготовленный запрос
+	sqlQuery, err := parser.parse()
 
 	if err != nil {
 		return err
 	}
-
-	// fmt.Println(sqlQuery)
 
 	// Executor
 	executor := NewExecutor(sqlQuery)
