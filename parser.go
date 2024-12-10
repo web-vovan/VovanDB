@@ -34,7 +34,9 @@ func (p *Parser) parse() (SQLQuery, error) {
 		sqlQuery, err = createParser(p)		
 	} else if p.isSelectQuery() {
 		sqlQuery, err = selectParser(p)
-	} else {
+	} else if p.isDropQuery() {
+        sqlQuery, err = dropParser(p)
+    } else {
 		return sqlQuery, fmt.Errorf("данный тип запроса пока не поддерживается %s", p.Tokens[0].Value)
 	}
 
@@ -80,6 +82,12 @@ func (p *Parser) isCreateQuery() bool {
     t := p.current()
 
     return t.Type == TYPE_KEYWORD && t.Value == "CREATE"
+}
+
+func (p *Parser) isDropQuery() bool {
+    t := p.current()
+
+    return t.Type == TYPE_KEYWORD && t.Value == "DROP"
 }
 
 func (p *Parser) isIdentifier() bool {

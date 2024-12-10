@@ -6,8 +6,8 @@ import (
 	"os"
 )
 
-func createExecutor(s CreateQuery) error { 
-    tableName := s.Table
+func createExecutor(s CreateQuery) error {
+	tableName := s.Table
 
 	err := validateCreateExecutor(s)
 
@@ -34,11 +34,11 @@ func createExecutor(s CreateQuery) error {
 
 	schema := TableSchema{
 		TableName: tableName,
-		Columns: &columns,
+		Columns:   &columns,
 	}
 
 	schemaData, err := json.MarshalIndent(schema, "", "  ")
-	
+
 	if err != nil {
 		return fmt.Errorf("ошибка при сериализации файла схемы в таблице %s: %w", tableName, err)
 	}
@@ -46,9 +46,9 @@ func createExecutor(s CreateQuery) error {
 	err = os.WriteFile(getPathTableSchema(tableName), schemaData, 0644)
 
 	if err != nil {
-		return fmt.Errorf("не удалось записать данные в файл схемы для таблицы: %s", tableName) 
+		return fmt.Errorf("не удалось записать данные в файл схемы для таблицы: %s", tableName)
 	}
-	
+
 	return nil
 }
 

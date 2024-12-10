@@ -37,6 +37,7 @@ var keywords = map[string]bool{
 	"AND":    true,
 	"CREATE":    true,
 	"TABLE":    true,
+	"DROP": true,
 }
 
 // Булевы выражения
