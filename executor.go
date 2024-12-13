@@ -15,7 +15,7 @@ func NewExecutor(s SQLQuery) *Executor {
 func (e *Executor) executeQuery() error {
 	var err error
 
-	switch t := e.sqlQuery.(type) {
+	switch e.sqlQuery.(type) {
 	case CreateQuery:
 		createQuery, ok := e.sqlQuery.(CreateQuery)
 
@@ -41,7 +41,7 @@ func (e *Executor) executeQuery() error {
 			return err
 		}
 	default:
-		return fmt.Errorf("не поддерживается тип %s", t)
+		return fmt.Errorf("данный тип запросов не поддерживается")
 	}
 
 	return nil

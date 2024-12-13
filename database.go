@@ -1,5 +1,7 @@
 package vovanDB
 
+
+
 func Execute(sql string) error {
 	// Лексический анализатор
 	lexer := NewLexer(sql)

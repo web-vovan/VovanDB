@@ -38,6 +38,9 @@ var keywords = map[string]bool{
 	"CREATE":    true,
 	"TABLE":    true,
 	"DROP": true,
+	"INSERT": true,
+	"INTO": true,
+	"VALUES": true,
 }
 
 // Булевы выражения

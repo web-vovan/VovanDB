@@ -36,6 +36,8 @@ func (p *Parser) parse() (SQLQuery, error) {
 		sqlQuery, err = selectParser(p)
 	} else if p.isDropQuery() {
         sqlQuery, err = dropParser(p)
+    } else if p.isInsertQuery() {
+        sqlQuery, err = insertParser(p)
     } else {
 		return sqlQuery, fmt.Errorf("данный тип запроса пока не поддерживается %s", p.Tokens[0].Value)
 	}
@@ -88,6 +90,12 @@ func (p *Parser) isDropQuery() bool {
     t := p.current()
 
     return t.Type == TYPE_KEYWORD && t.Value == "DROP"
+}
+
+func (p *Parser) isInsertQuery() bool {
+    t := p.current()
+
+    return t.Type == TYPE_KEYWORD && t.Value == "INSERT"
 }
 
 func (p *Parser) isIdentifier() bool {
@@ -173,29 +181,65 @@ func (p *Parser) getCondition() (Condition, error) {
 func (p *Parser) getCreateColumn() (CreateColumn, error) {
     nilCreateColumn := CreateColumn{}
 
-    // fmt.Println(p.current())
     if !p.isIdentifier() {
         fmt.Println(p.current())
-        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок 1")
+        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок")
     }
 
     name := p.next().Value
 
     if !p.isIdentifier() {
-        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок 2")
+        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок")
     }
-
     
     typeText := strings.ToUpper(p.next().Value)
 
     columnType := columnTypes[typeText]
 
     if columnType == 0 {
-        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок 3")
+        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок")
     } 
 
     return CreateColumn{
         Name: name,
         Type: columnType,
     }, nil
+}
+
+func (p *Parser) getInsertRow() ([]InsertValue, error) {
+    var rowValues []InsertValue
+
+    if !p.isOpenParen() {
+		return rowValues, fmt.Errorf("неверная структура запроса, отсутствует символ (")
+	}
+
+    p.next()
+
+    hasCloseParen := false
+
+    for {
+        if p.isComma() {
+			p.next()
+			continue
+		}
+
+		if p.isCloseParen() {
+            hasCloseParen = true
+			p.next()
+			break
+		}
+
+		rowValues = append(rowValues, InsertValue{
+			Type: p.current().Type,
+            Value: p.current().Value,
+		})
+
+        p.next()
+    }
+
+    if !hasCloseParen {
+        return rowValues, fmt.Errorf("неверная структура запроса, отсутствует символ )")
+    }
+
+    return rowValues, nil
 }
