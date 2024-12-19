@@ -32,10 +32,22 @@ func (e *Executor) executeQuery() error {
 		dropQuery, ok := e.sqlQuery.(DropQuery)
 
 		if !ok {
-			return fmt.Errorf("ошибка при преобразовании типа CreateQuery")
+			return fmt.Errorf("ошибка при преобразовании типа DropQuery")
 		}
 
 		err = dropExecutor(dropQuery)
+
+		if err != nil {
+			return err
+		}
+	case InsertQuery:
+		insertQuery, ok := e.sqlQuery.(InsertQuery)
+
+		if !ok {
+			return fmt.Errorf("ошибка при преобразовании типа InsertQuery")
+		}
+
+		err = insertExecutor(insertQuery)
 
 		if err != nil {
 			return err

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+    "encoding/json"
 )
 
 const databaseDir = "database"
@@ -65,4 +66,21 @@ func createDatabaseDirIfNotExists() error {
     }
 
     return nil
+}
+
+func getSchema(tableName string) (TableSchema, error) {
+    var schema TableSchema
+	schemaData, err := os.ReadFile(getPathTableSchema(tableName))
+
+	if err != nil {
+		return schema, fmt.Errorf("не удалось загрузить файл схемы для таблицы %s", tableName)
+	}
+
+	err = json.Unmarshal(schemaData, &schema)
+
+	if err != nil {
+		return schema, fmt.Errorf("ошибка при декодировании файла схемы для таблицы %s", tableName)
+	}
+
+    return schema, nil
 }
