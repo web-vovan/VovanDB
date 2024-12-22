@@ -26,7 +26,7 @@ func selectParser(p *Parser) (SQLQuery, error) {
 	if p.isSelectQuery() {
 		p.next()
 	} else {
-		return nil, fmt.Errorf("неверная структура запроса для select")
+		return nil, fmt.Errorf("неверная структура запроса1")
 	}
 
 	// Колонки
@@ -40,17 +40,30 @@ func selectParser(p *Parser) (SQLQuery, error) {
 	}
 
 	if p.isEnd() || p.current().Value != "FROM" {
-		return nil, fmt.Errorf("неверная структура запроса")
+		return nil, fmt.Errorf("неверная структура запроса2")
 	}
 
 	p.next()
 
 	// Таблица
 	if !p.isIdentifier() {
-		return nil, fmt.Errorf("неверная структура запроса")
+		return nil, fmt.Errorf("неверная структура запроса3")
 	}
 
 	table = p.next().Value
+
+	if p.isSemicolon() {
+		p.next()
+
+		if p.isEnd() {
+			return SelectQuery{
+				Table:   table,
+				Columns: columns,
+			}, nil
+		} else {
+			return nil, fmt.Errorf("неверная структура запроса4")
+		}
+	}
 
 	if p.isEnd() {
 		return SelectQuery{
@@ -60,14 +73,14 @@ func selectParser(p *Parser) (SQLQuery, error) {
 	}
 
 	if p.current().Value != "WHERE" {
-		return nil, fmt.Errorf("неверная структура запроса")
+		return nil, fmt.Errorf("неверная структура запроса5")
 	}
 
 	p.next()
 
 	// Условия
 	for {
-		if p.isEnd() {
+		if p.isEnd() || p.isSemicolon() {
 			break
 		}
 
@@ -86,7 +99,7 @@ func selectParser(p *Parser) (SQLQuery, error) {
 	}
 
 	if len(conditions) == 0 {
-		return nil, fmt.Errorf("неверная структура запроса")
+		return nil, fmt.Errorf("неверная структура запроса6")
 	}
 
 	if p.isSemicolon() {
@@ -94,7 +107,7 @@ func selectParser(p *Parser) (SQLQuery, error) {
 	}
 
 	if !p.isEnd() {
-		return nil, fmt.Errorf("неверная структура запроса")
+		return nil, fmt.Errorf("неверная структура запроса7")
 	}
 
 	return SelectQuery{

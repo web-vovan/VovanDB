@@ -1,5 +1,7 @@
 package vovanDB
 
+import "fmt"
+
 type Table struct {
 	Schema *TableSchema
 }
@@ -35,4 +37,14 @@ func (s *TableSchema) hasColumnInSchema(columnName string) bool {
 	}
 
 	return false
+}
+
+func (s *TableSchema) getColumnType(columnName string) (int, error) {
+	for _, c := range *s.Columns {
+		if c.Name == columnName {
+			return c.Type, nil
+		}
+	}
+
+	return -1, fmt.Errorf("колонки %s нет в схеме таблицы %s", columnName, s.TableName)
 }
