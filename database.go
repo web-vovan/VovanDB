@@ -1,8 +1,14 @@
 package vovanDB
 
+import (
+	"fmt"
+	"runtime"
+	"time"
+)
 
+func Execute(sql string) (string, error) {
+	start := time.Now()
 
-func Execute(sql string) error {
 	// Лексический анализатор
 	lexer := NewLexer(sql)
 
@@ -10,7 +16,7 @@ func Execute(sql string) error {
 	tokens, err := lexer.Analyze()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Парсер
@@ -20,7 +26,7 @@ func Execute(sql string) error {
 	sqlQuery, err := parser.parse()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Executor
@@ -30,8 +36,29 @@ func Execute(sql string) error {
 	err = executor.executeQuery()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	duration := time.Since(start)
+
+	var memStats runtime.MemStats
+	runtime.ReadMemStats(&memStats)
+
+	statisticData := fmt.Sprintf("время выполнения: %s \nвыделено памяти: %s", duration.String(), humanReadableBytes(memStats.Alloc))
+
+	return statisticData, nil
+}
+
+func humanReadableBytes(bytes uint64) string {
+	const uint = 1024
+
+	if bytes < uint {
+		return fmt.Sprintf("%d B", bytes)
+	}
+
+	if bytes < uint * uint {
+		return fmt.Sprintf("%d KB", bytes/uint)
+	}
+
+	return fmt.Sprintf("%d MB", bytes/(uint * uint))
 }
