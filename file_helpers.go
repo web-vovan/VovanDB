@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
     "encoding/json"
+    "strings"
 )
 
 const databaseDir = "database"
@@ -68,6 +69,7 @@ func createDatabaseDirIfNotExists() error {
     return nil
 }
 
+// Получение схемы таблицы
 func getSchema(tableName string) (TableSchema, error) {
     var schema TableSchema
 	schemaData, err := os.ReadFile(getPathTableSchema(tableName))
@@ -83,4 +85,22 @@ func getSchema(tableName string) (TableSchema, error) {
 	}
 
     return schema, nil
+}
+
+// Получение данных таблицы
+func getTableData(tableName string) ([][]string, error) {
+    var result [][]string
+    rawData, err := os.ReadFile(getPathTableData(tableName))
+
+    if err != nil {
+        return result, fmt.Errorf("не удалось прочитать файл с данными таблицы %s", tableName)
+    }
+
+    for _, line := range strings.Split(string(rawData), "\n") {
+        if line != "" {
+            result = append(result, strings.Split(line, ";"))
+        }
+    }
+
+    return result, nil
 }

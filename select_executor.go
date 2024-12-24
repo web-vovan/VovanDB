@@ -5,13 +5,22 @@ import (
 )
 
 func selectExecutor(s SelectQuery) error {
-	// tableName := s.Table
+	tableName := s.Table
 
 	err := validateSelectExecutor(s)
 
 	if err != nil {
 		return err
 	}
+
+	// Загружаем данные таблицы
+	tableData, err := getTableData(tableName)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(tableData)
 
 	return nil
 }
