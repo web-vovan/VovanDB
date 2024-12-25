@@ -2,12 +2,20 @@ package vovanDB
 
 import (
 	"fmt"
+	"strings"
 )
 
 func selectExecutor(s SelectQuery) error {
 	tableName := s.Table
 
 	err := validateSelectExecutor(s)
+
+	if err != nil {
+		return err
+	}
+
+	// Загружаем схему
+	tableSchema, err := getSchema(tableName)
 
 	if err != nil {
 		return err
@@ -20,7 +28,29 @@ func selectExecutor(s SelectQuery) error {
 		return err
 	}
 
-	fmt.Println(tableData)
+	var builder strings.Builder
+
+	builder.WriteString("[")
+
+	for i, line := range tableData {
+		builder.WriteString("{")
+
+		for j, data := range line {
+			builder.WriteString("\"" + (*tableSchema.Columns)[j].Name + "\"" + ":\"" + data + "\"")
+
+			if j < len(line)-1 {
+				builder.WriteString(",")
+			}
+		}
+
+		builder.WriteString("}")
+
+		if i < len(tableData)-1 {
+			builder.WriteString(",")
+		}
+	}
+
+	fmt.Println(builder.String()) 
 
 	return nil
 }
