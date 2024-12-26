@@ -7,7 +7,7 @@ type Table struct {
 }
 
 type TableSchema struct {
-	TableName string         `json:"tableName"`
+	TableName string          `json:"tableName"`
 	Columns   *[]ColumnSchema `json:"columns"`
 }
 
@@ -29,6 +29,7 @@ func (s TableSchema) String() string {
 	return result
 }
 
+// Проверка наличия колонки в схеме
 func (s *TableSchema) hasColumnInSchema(columnName string) bool {
 	for _, c := range *s.Columns {
 		if c.Name == columnName {
@@ -39,10 +40,22 @@ func (s *TableSchema) hasColumnInSchema(columnName string) bool {
 	return false
 }
 
+// Тип колонки
 func (s *TableSchema) getColumnType(columnName string) (int, error) {
 	for _, c := range *s.Columns {
 		if c.Name == columnName {
 			return c.Type, nil
+		}
+	}
+
+	return -1, fmt.Errorf("колонки %s нет в схеме таблицы %s", columnName, s.TableName)
+}
+
+// Индекс колонки
+func (s *TableSchema) getColumnIndex(columnName string) (int, error) {
+	for i, c := range *s.Columns {
+		if c.Name == columnName {
+			return i, nil
 		}
 	}
 

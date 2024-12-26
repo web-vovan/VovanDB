@@ -28,11 +28,49 @@ func selectExecutor(s SelectQuery) error {
 		return err
 	}
 
+	// Индексы строк для фильтрации
+	var filterRowIndex = make(map[int]bool)
+
+	// Фильтруем данные
+	if len(s.Conditions) > 0 {
+		// Условия для фильтрации с индексами
+		var indexCondition = make(map[int]Condition)
+
+		for _, condition := range s.Conditions {
+			index, err := tableSchema.getColumnIndex(condition.Column)
+
+			if err != nil {
+				return err
+			}
+
+			indexCondition[index] = condition
+		}
+
+		for i, line := range tableData {
+			hasFiltered := false
+			for j, condition := range indexCondition {
+				if condition.Value != line[j] {
+					hasFiltered = true
+					break
+				}
+			}
+
+			if hasFiltered {
+				filterRowIndex[i] = true
+			}
+		}
+	}
+
 	var builder strings.Builder
 
 	builder.WriteString("[")
 
 	for i, line := range tableData {
+		// Пропускаем отфильтрованную строку
+		if _, ok := filterRowIndex[i]; ok {
+			break
+		}
+
 		builder.WriteString("{")
 
 		for j, data := range line {
@@ -49,8 +87,6 @@ func selectExecutor(s SelectQuery) error {
 			builder.WriteString(",")
 		}
 	}
-
-	fmt.Println(builder.String()) 
 
 	return nil
 }
