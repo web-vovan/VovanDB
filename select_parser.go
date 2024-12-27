@@ -18,6 +18,10 @@ func (q SelectQuery) QueryType() string {
 	return "SELECT"
 }
 
+func (q SelectQuery) showAllColumns() bool {
+	return q.Columns[0] == "*"
+}
+
 func selectParser(p *Parser) (SQLQuery, error) {
 	var columns []string
 	var table string

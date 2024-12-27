@@ -9,7 +9,7 @@ import (
 func createExecutor(s CreateQuery) error {
 	tableName := s.Table
 
-	err := validateCreateExecutor(s)
+	err := validateCreateQuery(s)
 
 	if err != nil {
 		return err
@@ -47,27 +47,6 @@ func createExecutor(s CreateQuery) error {
 
 	if err != nil {
 		return fmt.Errorf("не удалось записать данные в файл схемы для таблицы: %s", tableName)
-	}
-
-	return nil
-}
-
-// Валидация
-func validateCreateExecutor(s CreateQuery) error {
-	// Существование таблицы
-	if fileExists(getPathTableSchema(s.Table)) || fileExists(getPathTableData(s.Table)) {
-		return fmt.Errorf("невозможно создать таблицу %s, она уже существует", s.Table)
-	}
-
-	// Уникальность имен колонок
-	nameColumns := make(map[string]bool)
-
-	for _, columns := range s.Columns {
-		if nameColumns[columns.Name] {
-			return fmt.Errorf("дубль колонки %s", columns.Name)
-		}
-
-		nameColumns[columns.Name] = true
 	}
 
 	return nil

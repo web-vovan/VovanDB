@@ -8,7 +8,7 @@ import (
 func dropExecutor(s DropQuery) error {
 	tableName := s.Table
 
-	err := validateDropExecutor(s)
+	err := validateDropQuery(s)
 
 	if err != nil {
 		return err
@@ -25,16 +25,6 @@ func dropExecutor(s DropQuery) error {
 
 	if err != nil {
 		return fmt.Errorf("не удалось удалить файл с данными для таблицы: %s", tableName)
-	}
-
-	return nil
-}
-
-// Валидация
-func validateDropExecutor(s DropQuery) error {
-	// Существование файлов таблицы
-	if !fileExists(getPathTableSchema(s.Table)) || !fileExists(getPathTableData(s.Table)) {
-		return fmt.Errorf("невозможно удалить таблицу %s, она не существует", s.Table)
 	}
 
 	return nil
