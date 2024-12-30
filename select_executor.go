@@ -27,68 +27,30 @@ func selectExecutor(s SelectQuery) error {
 		return err
 	}
 
-	// Индексы строк для фильтрации
-	var filterRowIndex = make(map[int]bool)
+	// Индексы неподходящих строк
+	notMatchingRowIndices, err := getNotMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
 
-	// Фильтруем данные
-	if len(s.Conditions) > 0 {
-		// Условия для фильтрации с индексами
-		var indexCondition = make(map[int]Condition)
-
-		for _, condition := range s.Conditions {
-			index, err := tableSchema.getColumnIndex(condition.Column)
-
-			if err != nil {
-				return err
-			}
-
-			indexCondition[index] = condition
-		}
-
-		for i, line := range tableData {
-			hasFiltered := false
-			for j, condition := range indexCondition {
-				if condition.Value != line[j] {
-					hasFiltered = true
-					break
-				}
-			}
-
-			if hasFiltered {
-				filterRowIndex[i] = true
-			}
-		}
+	if err != nil {
+		return err
 	}
 
-	// Индексы колонок для фильтрации
-	var filterColumnIndex = make(map[int]bool)
+	// Индексы подходящих колонок
+	matchingColumnIndices, err := getMatchingColumnIndices(&tableSchema, s.Columns)
 
-	if s.showAllColumns() {
-		for i := range s.Columns {
-			filterColumnIndex[i] = true
-		}
-	} else {
-		for _, column := range s.Columns {
-			index, err := tableSchema.getColumnIndex(column)
-
-			if err != nil {
-				return err
-			}
-
-			filterColumnIndex[index] = true
-		}
+	if err != nil {
+		return err
 	}
 
 	var builder strings.Builder
 
-	countRows := len(tableData) - len(filterRowIndex)
-	countColumns := len(filterColumnIndex)
+	countRows := len(tableData) - len(notMatchingRowIndices)
+	countColumns := len(matchingColumnIndices)
 
 	builder.WriteString("[")
 
 	for i, line := range tableData {
-		// Пропускаем отфильтрованную строку
-		if _, ok := filterRowIndex[i]; ok {
+		// Пропускаем строку, не подходящую под фильтр
+		if _, ok := notMatchingRowIndices[i]; ok {
 			continue
 		}
 
@@ -96,7 +58,7 @@ func selectExecutor(s SelectQuery) error {
 
 		for j, data := range line {
 			// Пропускаем колонки
-			if _, ok := filterColumnIndex[j]; !ok {
+			if _, ok := matchingColumnIndices[j]; !ok {
 				continue
 			}
 
