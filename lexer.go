@@ -41,6 +41,8 @@ var keywords = map[string]bool{
 	"INSERT": true,
 	"INTO": true,
 	"VALUES": true,
+	"UPDATE": true,
+	"SET": true,
 }
 
 // Булевы выражения

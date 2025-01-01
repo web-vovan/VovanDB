@@ -38,6 +38,8 @@ func (p *Parser) parse() (SQLQuery, error) {
         sqlQuery, err = dropParser(p)
     } else if p.isInsertQuery() {
         sqlQuery, err = insertParser(p)
+    } else if p.isUpdateQuery() {
+        sqlQuery, err = updateParser(p)
     } else {
 		return sqlQuery, fmt.Errorf("данный тип запроса пока не поддерживается %s", p.Tokens[0].Value)
 	}
@@ -75,31 +77,31 @@ func (p *Parser) isEnd() bool {
 }
 
 func (p *Parser) isSelectQuery() bool {
-    t := p.current()
-
-    return t.Type == TYPE_KEYWORD && t.Value == "SELECT"
+    return p.isKeyword() && p.current().Value == "SELECT"
 }
 
 func (p *Parser) isCreateQuery() bool {
-    t := p.current()
-
-    return t.Type == TYPE_KEYWORD && t.Value == "CREATE"
+    return p.isKeyword() && p.current().Value == "CREATE"
 }
 
 func (p *Parser) isDropQuery() bool {
-    t := p.current()
-
-    return t.Type == TYPE_KEYWORD && t.Value == "DROP"
+    return p.isKeyword() && p.current().Value == "DROP"
 }
 
 func (p *Parser) isInsertQuery() bool {
-    t := p.current()
+    return p.isKeyword() && p.current().Value == "INSERT"
+}
 
-    return t.Type == TYPE_KEYWORD && t.Value == "INSERT"
+func (p *Parser) isUpdateQuery() bool {
+    return p.isKeyword() && p.current().Value == "UPDATE"
 }
 
 func (p *Parser) isIdentifier() bool {
     return p.current().Type == TYPE_IDENTIFIER
+}
+
+func (p *Parser) isKeyword() bool {
+    return p.current().Type == TYPE_KEYWORD
 }
 
 func (p *Parser) isOperator() bool {
@@ -107,7 +109,7 @@ func (p *Parser) isOperator() bool {
 }
 
 func (p *Parser) isSymbol() bool {
-    return p.current().Type == TYPE_OPERATOR
+    return p.current().Type == TYPE_SYMBOL
 }
 
 func (p *Parser) isString() bool {
@@ -123,27 +125,31 @@ func (p *Parser) isBool() bool {
 }
 
 func (p *Parser) isComma() bool {
-    return p.current().Type == TYPE_SYMBOL && p.current().Value == ","
+    return p.isSymbol() && p.current().Value == ","
 }
 
 func (p *Parser) isSemicolon() bool {
-    return p.current().Type == TYPE_SYMBOL && p.current().Value == ";"
+    return p.isSymbol() && p.current().Value == ";"
 }
 
 func (p *Parser) isAsterisk() bool {
-    return p.current().Type == TYPE_SYMBOL && p.current().Value == "*"
+    return p.isSymbol() && p.current().Value == "*"
 }
 
 func (p *Parser) isAndKeyword() bool {
-    return p.current().Type == TYPE_KEYWORD && p.current().Value == "AND"
+    return p.isKeyword() && p.current().Value == "AND"
 }
 
 func (p *Parser) isOpenParen() bool {
-    return p.current().Type == TYPE_SYMBOL && p.current().Value == "("
+    return p.isSymbol() && p.current().Value == "("
 }
 
 func (p *Parser) isCloseParen() bool {
-    return p.current().Type == TYPE_SYMBOL && p.current().Value == ")"
+    return p.isSymbol() && p.current().Value == ")"
+}
+
+func (p *Parser) isEqualOperator() bool {
+    return p.isOperator() && p.current().Value == "="
 }
 
 func (p *Parser) getCondition() (Condition, error) {
@@ -242,4 +248,78 @@ func (p *Parser) getInsertRow() ([]InsertValue, error) {
     }
 
     return rowValues, nil
+}
+
+func (p *Parser) getArrayConditions() ([]Condition, error) {
+    var conditions []Condition
+
+    // Условия
+	for {
+		if p.isEnd() || p.isSemicolon() {
+			break
+		}
+
+		if p.isAndKeyword() {
+			p.next()
+			continue
+		}
+
+		condition, err := p.getCondition()
+
+		if err != nil {
+			return nil, err
+		}
+
+		conditions = append(conditions, condition)
+	}
+
+	if len(conditions) == 0 {
+		return nil, fmt.Errorf("нет условий в выражении where")
+	}
+
+    return conditions, nil
+}
+
+func (p *Parser) getUpdateValues() ([]UpdateValue, error) {
+    var values []UpdateValue
+
+    for {
+		if p.isKeyword() || p.isSemicolon() || p.isEnd() {
+			break
+		}
+
+		if p.isComma() {
+			p.next()
+			continue
+		}
+
+		if !p.isIdentifier() {
+			return nil, fmt.Errorf("некорректное имя колонки для обновления")
+		}
+
+		columnName := p.next().Value
+
+		if !p.isEqualOperator() {
+			return nil, fmt.Errorf("некорректный символ для колонки при обновлении")
+		}
+
+		p.next()
+
+		if p.isString() || p.isBool() || p.isDigit() {
+			columnValue := p.current().Value
+			columnType := p.current().Type
+
+			values = append(values, UpdateValue{
+				ColumnName: columnName,
+				Value:      columnValue,
+				Type:       columnType,
+			})
+
+			p.next()
+		} else {
+			return nil, fmt.Errorf("неверный тип для значения в колонки для обновления")
+		}
+	}
+
+    return values, nil
 }

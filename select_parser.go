@@ -83,27 +83,10 @@ func selectParser(p *Parser) (SQLQuery, error) {
 	p.next()
 
 	// Условия
-	for {
-		if p.isEnd() || p.isSemicolon() {
-			break
-		}
+	conditions, err := p.getArrayConditions()
 
-		if p.isAndKeyword() {
-			p.next()
-			continue
-		}
-
-		condition, err := p.getCondition()
-
-		if err != nil {
-			return nil, err
-		}
-
-		conditions = append(conditions, condition)
-	}
-
-	if len(conditions) == 0 {
-		return nil, fmt.Errorf("неверная структура запроса6")
+	if err != nil {
+		return nil, err
 	}
 
 	if p.isSemicolon() {
@@ -111,7 +94,7 @@ func selectParser(p *Parser) (SQLQuery, error) {
 	}
 
 	if !p.isEnd() {
-		return nil, fmt.Errorf("неверная структура запроса7")
+		return nil, fmt.Errorf("неверная структура запроса6")
 	}
 
 	return SelectQuery{
