@@ -64,6 +64,18 @@ func (e *Executor) executeQuery() error {
 		if err != nil {
 			return err
 		}
+	case UpdateQuery:
+		updateQuery, ok := e.sqlQuery.(UpdateQuery)
+
+		if !ok {
+			return fmt.Errorf("ошибка при преобразовании типа InsertQuery")
+		}
+
+		err = updateExecutor(updateQuery)
+
+		if err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("данный тип запросов не поддерживается")
 	}
