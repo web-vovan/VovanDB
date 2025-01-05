@@ -14,11 +14,7 @@ func selectExecutor(s SelectQuery) error {
 	}
 
 	// Загружаем схему
-	tableSchema, err := getSchema(tableName)
-
-	if err != nil {
-		return err
-	}
+	tableSchema, _ := getSchema(tableName)
 
 	// Загружаем данные таблицы
 	tableData, err := getTableData(tableName)

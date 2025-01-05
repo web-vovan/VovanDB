@@ -15,18 +15,18 @@ func insertExecutor(s InsertQuery) error {
 		return err
 	}
 
+	var insertData bytes.Buffer
+
+	for _, r := range s.Values {
+		insertData.Write(getInsertRowData(r))
+	}
+
 	file, err := os.OpenFile(getPathTableData(tableName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
 	defer file.Close()
 
 	if err != nil {
 		return fmt.Errorf("не удалось открыть файл для записи: %w", err)
-	}
-
-	var insertData bytes.Buffer
-
-	for _, r := range s.Values {
-		insertData.Write(getRowData(r))
 	}
 
 	_, err = file.Write(insertData.Bytes())
@@ -39,7 +39,7 @@ func insertExecutor(s InsertQuery) error {
 }
 
 // Получение строки с данными
-func getRowData(r []InsertValue) []byte {
+func getInsertRowData(r []InsertValue) []byte {
 	var rowBuffer bytes.Buffer
 
 	countValues := len(r)
