@@ -1,9 +1,7 @@
 package vovanDB
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 )
 
 func createExecutor(s CreateQuery) error {
@@ -27,26 +25,31 @@ func createExecutor(s CreateQuery) error {
 
 	for _, column := range s.Columns {
 		columns = append(columns, ColumnSchema{
-			Name: column.Name,
-			Type: column.Type,
+			Name:          column.Name,
+			Type:          column.Type,
+			AutoIncrement: column.AutoIncrement,
 		})
+	}
+
+	// Устанавливаем значение для колонок с auto_increment
+	autoIncrementValues := make(map[string]int)
+	
+	for _, column := range columns {
+		if column.AutoIncrement {
+			autoIncrementValues[column.Name] = 0
+		}
 	}
 
 	schema := TableSchema{
 		TableName: tableName,
 		Columns:   &columns,
+		AutoIncrements: autoIncrementValues,
 	}
 
-	schemaData, err := json.MarshalIndent(schema, "", "  ")
+	err = schema.writeToFile()
 
 	if err != nil {
-		return fmt.Errorf("ошибка при сериализации файла схемы в таблице %s: %w", tableName, err)
-	}
-
-	err = os.WriteFile(getPathTableSchema(tableName), schemaData, 0644)
-
-	if err != nil {
-		return fmt.Errorf("не удалось записать данные в файл схемы для таблицы: %s", tableName)
+		return err
 	}
 
 	return nil

@@ -43,6 +43,7 @@ var keywords = map[string]bool{
 	"VALUES": true,
 	"UPDATE": true,
 	"SET": true,
+	"AUTO_INCREMENT": true,
 }
 
 // Булевы выражения
@@ -180,7 +181,7 @@ func (l *Lexer) isEnd() bool {
 func (l *Lexer) getStringToken() Token {
 	var builder strings.Builder
 
-	for l.isString() {
+	for l.isString() || l.current() == '_' {
 		builder.WriteRune(l.next())
 	}
 

@@ -88,12 +88,19 @@ func validateCreateQuery(s CreateQuery) error {
 	// Уникальность имен колонок
 	nameColumns := make(map[string]bool)
 
-	for _, columns := range s.Columns {
-		if nameColumns[columns.Name] {
-			return fmt.Errorf("дубль колонки %s", columns.Name)
+	for _, column := range s.Columns {
+		if nameColumns[column.Name] {
+			return fmt.Errorf("дубль колонки %s", column.Name)
 		}
 
-		nameColumns[columns.Name] = true
+		nameColumns[column.Name] = true
+	}
+
+	// Проверка типа колонки с auto_increment
+	for _, column := range s.Columns {
+		if column.AutoIncrement && column.Type != TYPE_DIGIT {
+			return fmt.Errorf("колонка %s с типом %s не может иметь атрибут auto_increment", column.Name, typeNames[column.Type])
+		}
 	}
 
 	return nil

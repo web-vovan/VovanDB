@@ -140,6 +140,10 @@ func (p *Parser) isAndKeyword() bool {
     return p.isKeyword() && p.current().Value == "AND"
 }
 
+func (p *Parser) isAutoIncrementKeyword() bool {
+    return p.isKeyword() && p.current().Value == "AUTO_INCREMENT"
+}
+
 func (p *Parser) isOpenParen() bool {
     return p.isSymbol() && p.current().Value == "("
 }
@@ -204,11 +208,19 @@ func (p *Parser) getCreateColumn() (CreateColumn, error) {
 
     if columnType == 0 {
         return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок")
-    } 
+    }
+
+	autoIncrement := false
+
+	if p.isAutoIncrementKeyword() {
+		autoIncrement = true
+		p.next()
+	} 
 
     return CreateColumn{
         Name: name,
         Type: columnType,
+		AutoIncrement: autoIncrement,
     }, nil
 }
 

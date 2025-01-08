@@ -1,19 +1,25 @@
 package vovanDB
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+)
 
 type Table struct {
 	Schema *TableSchema
 }
 
 type TableSchema struct {
-	TableName string          `json:"tableName"`
-	Columns   *[]ColumnSchema `json:"columns"`
+	TableName      string          `json:"tableName"`
+	Columns        *[]ColumnSchema `json:"columns"`
+	AutoIncrements map[string]int `json:"autoIncrementValues"`
 }
 
 type ColumnSchema struct {
-	Name string `json:"name"`
-	Type int    `json:"type"`
+	Name          string `json:"name"`
+	Type          int    `json:"type"`
+	AutoIncrement bool   `json:"autoIncrement"`
 }
 
 func (s TableSchema) String() string {
@@ -60,4 +66,20 @@ func (s *TableSchema) getColumnIndex(columnName string) (int, error) {
 	}
 
 	return -1, fmt.Errorf("колонки %s нет в схеме таблицы %s", columnName, s.TableName)
+}
+
+func (s *TableSchema) writeToFile() error {
+	schemaData, err := json.MarshalIndent(s, "", "  ")
+
+	if err != nil {
+		return fmt.Errorf("ошибка при сериализации файла схемы в таблице %s: %w", s.TableName, err)
+	}
+
+	err = os.WriteFile(getPathTableSchema(s.TableName), schemaData, 0644)
+
+	if err != nil {
+		return fmt.Errorf("не удалось записать данные в файл схемы для таблицы: %s", s.TableName)
+	}
+
+	return nil
 }

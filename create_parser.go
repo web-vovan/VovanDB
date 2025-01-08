@@ -13,6 +13,7 @@ var columnTypes = map[string]int{
 type CreateColumn struct {
 	Name string
 	Type int
+	AutoIncrement bool
 }
 
 type CreateQuery struct {
@@ -25,7 +26,7 @@ func (q CreateQuery) String() string {
 }
 
 func (c CreateColumn) String() string {
-	return fmt.Sprintf("\nName: %s\nType: %s", c.Name, typeNames[c.Type])
+	return fmt.Sprintf("\nName: %s\nType: %s\nAutoIncrement: %t", c.Name, typeNames[c.Type], c.AutoIncrement)
 }
 
 func (q CreateQuery) QueryType() string {
