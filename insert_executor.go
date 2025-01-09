@@ -2,14 +2,18 @@ package vovanDB
 
 import (
 	"bytes"
-	"fmt"
-	"os"
+	"strconv"
 )
 
 func insertExecutor(s InsertQuery) error {
 	tableName := s.Table
+	schema, err := getSchema(tableName)
 
-	err := validateInsertQuery(s)
+	if err != nil {
+		return err
+	}
+
+	err = validateInsertQuery(s)
 
 	if err != nil {
 		return err
@@ -17,37 +21,42 @@ func insertExecutor(s InsertQuery) error {
 
 	var insertData bytes.Buffer
 
+	autoIncrementColumnName := schema.getAutoIncrementColumnName()
+
 	for _, r := range s.Values {
-		insertData.Write(getInsertRowData(r))
+		insertData.Write(getInsertRowData(r, &schema, autoIncrementColumnName))
 	}
 
-	file, err := os.OpenFile(getPathTableData(tableName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-
-	defer file.Close()
+	err = writeDataInTable(insertData.Bytes(), tableName)
 
 	if err != nil {
-		return fmt.Errorf("не удалось открыть файл для записи: %w", err)
+		return err
 	}
 
-	_, err = file.Write(insertData.Bytes())
+	err = schema.writeToFile()
 
 	if err != nil {
-		return fmt.Errorf("не удалось записать данные в файл: %w", err)
+		return err
 	}
 
 	return nil
 }
 
 // Получение строки с данными
-func getInsertRowData(r []InsertValue) []byte {
+func getInsertRowData(r []InsertValue, s *TableSchema, autoIncrementColumnName string) []byte {
 	var rowBuffer bytes.Buffer
 
 	countValues := len(r)
 
+	if autoIncrementColumnName != "" {
+		s.incrementColumn(autoIncrementColumnName)
+		rowBuffer.WriteString(strconv.Itoa(s.AutoIncrements[autoIncrementColumnName]) + ";")
+	}
+
 	for i, v := range r {
 		rowBuffer.WriteString(v.Value)
 
-		if i < countValues - 1 {
+		if i < countValues-1 {
 			rowBuffer.WriteString(";")
 		}
 	}

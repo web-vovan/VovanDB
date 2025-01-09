@@ -104,3 +104,31 @@ func getTableData(tableName string) ([][]string, error) {
 
     return result, nil
 }
+
+func hasStringInSlice(value string, slice []string) bool {
+    for _, i := range slice {
+        if  i == value {
+            return true
+        }
+    }
+
+    return false
+}
+
+func writeDataInTable(data []byte, tableName string) error {
+    file, err := os.OpenFile(getPathTableData(tableName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+	defer file.Close()
+
+	if err != nil {
+		return fmt.Errorf("не удалось открыть файл для записи: %w", err)
+	}
+
+	_, err = file.Write(data)
+
+	if err != nil {
+		return fmt.Errorf("не удалось записать данные в файл: %w", err)
+	}
+
+	return nil
+}

@@ -130,26 +130,38 @@ func validateInsertQuery(s InsertQuery) error {
 		return err
 	}
 
-	// Сравниваем количество колонок
-	if len(*schema.Columns) != len(s.Columns) {
-		return fmt.Errorf("запрос невалиден, количество колонок в запросе и в таблице %s неравно", tableName)
+	// Проверяем что в insert есть все необходимые колонки
+	for _, c := range *schema.Columns {
+		if c.AutoIncrement {
+			continue
+		}
+
+		if !hasStringInSlice(c.Name, s.Columns) {
+			return fmt.Errorf("запрос невалиден, в запросе нет обязательной колонки %s", c.Name)
+		}
 	}
 
 	// Сравниваем названия колонок
-	for _, column := range s.Columns {
-		if !schema.hasColumnInSchema(column) {
-			return fmt.Errorf("запрос невалиден, в таблице %s нет колонки %s", tableName, column)
+	for _, c := range s.Columns {
+		if !schema.hasColumnInSchema(c) {
+			return fmt.Errorf("запрос невалиден, в таблице %s нет колонки %s", tableName, c)
+		}
+	}
+
+	// Проверяем количество элементов в строках
+	for i, rowValues := range s.Values {
+		if len(rowValues) != len(s.Columns) {
+			return fmt.Errorf("запрос невалиден, в строке %d неверное количество элементов", i+1)
 		}
 	}
 
 	// Сравниваем типы вставляемых значений
 	for i, rowValues := range s.Values {
-		// Проверяем количество
-		if len(rowValues) != len(*schema.Columns) {
-			return fmt.Errorf("запрос невалиден, в строке %d неверное количество элементов", i+1)
-		}
-
 		for j, value := range rowValues {
+			if (*schema.Columns)[j].AutoIncrement {
+				continue
+			}
+
 			if value.Type != (*schema.Columns)[j].Type {
 				return fmt.Errorf("запрос невалиден, в строке %d неверный тип ", i+1)
 			}

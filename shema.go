@@ -13,7 +13,7 @@ type Table struct {
 type TableSchema struct {
 	TableName      string          `json:"tableName"`
 	Columns        *[]ColumnSchema `json:"columns"`
-	AutoIncrements map[string]int `json:"autoIncrementValues"`
+	AutoIncrements map[string]int  `json:"autoIncrementValues"`
 }
 
 type ColumnSchema struct {
@@ -68,6 +68,17 @@ func (s *TableSchema) getColumnIndex(columnName string) (int, error) {
 	return -1, fmt.Errorf("колонки %s нет в схеме таблицы %s", columnName, s.TableName)
 }
 
+// У колонки есть атрибут auto_increment
+func (s *TableSchema) isAutoIncrementColumn(columnName string) (bool, error) {
+	for _, c := range *s.Columns {
+		if c.Name == columnName {
+			return c.AutoIncrement, nil
+		}
+	}
+
+	return false, fmt.Errorf("колонки %s нет в схеме таблицы %s", columnName, s.TableName)
+}
+
 func (s *TableSchema) writeToFile() error {
 	schemaData, err := json.MarshalIndent(s, "", "  ")
 
@@ -82,4 +93,36 @@ func (s *TableSchema) writeToFile() error {
 	}
 
 	return nil
+}
+
+func (s *TableSchema) getAutoIncrementValue(column string) (int, error) {
+	r, err := s.isAutoIncrementColumn(column)
+
+	if err != nil {
+		return 0, err
+	}
+
+	if !r {
+		return 0, fmt.Errorf("у колонки %s нет атрибута auto_increment", column)
+	}
+
+	if _, ok := s.AutoIncrements[column]; ok {
+		return s.AutoIncrements[column], nil
+	}
+
+	return 0, fmt.Errorf("ошибка в схема базы данных %s, для колонки %s не установлен счетчик auto_increment", s.TableName, column)
+}
+
+func (s *TableSchema) getAutoIncrementColumnName() string {
+	for _, c := range *s.Columns {
+		if c.AutoIncrement {
+			return c.Name
+		}
+	}
+
+	return ""
+}
+
+func (s *TableSchema) incrementColumn(column string) {
+	s.AutoIncrements[column]++
 }
