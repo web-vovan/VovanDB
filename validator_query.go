@@ -1,6 +1,9 @@
 package vovanDB
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 func validateSelectQuery(s SelectQuery) error {
 	tableName := s.Table
@@ -155,17 +158,81 @@ func validateInsertQuery(s InsertQuery) error {
 		}
 	}
 
+	// Маппинг индексов колонок в запросе, на индексе в схеме
+	mapColumns := make(map[int]int)
+
+	for i, column := range s.Columns {
+		schemaIndex, err := schema.getColumnIndex(column)
+
+		if err != nil {
+			return err
+		}
+
+		mapColumns[i] = schemaIndex
+	}
+
 	// Сравниваем типы вставляемых значений
 	for i, rowValues := range s.Values {
 		for j, value := range rowValues {
-			if (*schema.Columns)[j].AutoIncrement {
-				continue
-			}
-
-			if value.Type != (*schema.Columns)[j].Type {
+			if value.Type != (*schema.Columns)[mapColumns[j]].Type {
 				return fmt.Errorf("запрос невалиден, в строке %d неверный тип ", i+1)
 			}
 		}
+	}
+
+	// Валидируем поля в колонке auto_increment
+	err = validateAutoIncrementInsertQuery(&schema, &s, mapColumns)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func validateAutoIncrementInsertQuery(schema *TableSchema, s *InsertQuery, mapColumns map[int]int) error {
+	// Индекс колонки auto_increment в схеме
+	autoIncrementSchemaIndex := schema.getAutoIncrementColumnIndex()
+
+	if autoIncrementSchemaIndex == -1 {
+		return nil
+	}
+
+	// Индекс колонки auto_increment в запросе
+	autoIncrementIndex := -1
+
+	for k, i := range mapColumns {
+		if i == autoIncrementSchemaIndex {
+			autoIncrementIndex = k
+		}
+	}
+
+	if autoIncrementIndex == -1 {
+		return nil
+	}
+
+	// Текущее значение колонки auto_increment в схеме
+	currentAutoIncrementValue := schema.getAutoIncrementColumnValue()
+
+	if currentAutoIncrementValue == -1 {
+		return fmt.Errorf("не удалось получить текущее значение auto_increment для колонки")
+	}
+
+	autoIncrementValues := make(map[int]bool)
+
+	// Проверяем все значения auto_increment из запроса
+	for _, v := range s.Values {
+		value, _ := strconv.Atoi(v[autoIncrementIndex].Value)
+
+		if value < currentAutoIncrementValue {
+			return fmt.Errorf("значение %d меньше текущего значения %d в колонке auto_increment", value, currentAutoIncrementValue)
+		}
+
+		if _, ok := autoIncrementValues[value]; ok {
+			return fmt.Errorf("значение %d не уникально для колонки auto_increment", value)
+		}
+
+		autoIncrementValues[value] = true
 	}
 
 	return nil
