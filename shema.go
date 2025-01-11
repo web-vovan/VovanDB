@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 )
 
 type Table struct {
@@ -30,6 +31,12 @@ func (s TableSchema) String() string {
 
 	for _, c := range *s.Columns {
 		result += c.Name + " : " + typeNames[c.Type] + "\n"
+	}
+
+	result += "AutoIncrements: \n"
+
+	for i, v := range s.AutoIncrements {
+		result += i + " : " + strconv.Itoa(v) + "\n"
 	}
 
 	return result
@@ -84,6 +91,10 @@ func (s *TableSchema) writeToFile() error {
 	return nil
 }
 
+func (s *TableSchema) hasAutoIncrementColumn() bool {
+	return len(s.AutoIncrements) > 0
+}
+
 func (s *TableSchema) getAutoIncrementColumnName() string {
 	for _, c := range *s.Columns {
 		if c.AutoIncrement {
@@ -110,9 +121,9 @@ func (s *TableSchema) getAutoIncrementColumnValue() int {
 	if column == "" {
 		return -1
 	}
- 
+
 	r, ok := s.AutoIncrements[column]
-	
+
 	if !ok {
 		return -1
 	}

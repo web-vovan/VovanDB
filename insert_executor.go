@@ -21,10 +21,29 @@ func insertExecutor(s InsertQuery) error {
 
 	var insertData bytes.Buffer
 
+	hasAutoIncrementColumn := schema.hasAutoIncrementColumn()
+	addAutoIncrementData := false
 	autoIncrementColumnName := schema.getAutoIncrementColumnName()
 
+	if hasAutoIncrementColumn {
+		if !hasStringInSlice(autoIncrementColumnName, s.Columns) {
+			addAutoIncrementData = true
+		}
+	}
+
 	for _, r := range s.Values {
-		insertData.Write(getInsertRowData(r, &schema, autoIncrementColumnName))
+		if addAutoIncrementData {
+			schema.incrementColumn(autoIncrementColumnName)
+			insertData.WriteString(strconv.Itoa(schema.AutoIncrements[autoIncrementColumnName]) + ";")
+		}
+
+		insertData.Write(getInsertRowData(r))
+	}
+
+	// Обновляем схему значением последнего элемента из колонки auto_increment
+	if hasAutoIncrementColumn && !addAutoIncrementData {
+		newAutoIncrement, _ := strconv.Atoi(s.Values[len(s.Values)-1][0].Value)
+		schema.AutoIncrements[autoIncrementColumnName] = newAutoIncrement
 	}
 
 	err = writeDataInTable(insertData.Bytes(), tableName)
@@ -43,15 +62,10 @@ func insertExecutor(s InsertQuery) error {
 }
 
 // Получение строки с данными
-func getInsertRowData(r []InsertValue, s *TableSchema, autoIncrementColumnName string) []byte {
+func getInsertRowData(r []InsertValue) []byte {
 	var rowBuffer bytes.Buffer
 
 	countValues := len(r)
-
-	if autoIncrementColumnName != "" {
-		s.incrementColumn(autoIncrementColumnName)
-		rowBuffer.WriteString(strconv.Itoa(s.AutoIncrements[autoIncrementColumnName]) + ";")
-	}
 
 	for i, v := range r {
 		rowBuffer.WriteString(v.Value)
