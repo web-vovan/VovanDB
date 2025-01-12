@@ -76,7 +76,7 @@ func getMatchingColumnIndices(tableSchema *TableSchema, columns []string) (map[i
 	var result = make(map[int]bool)
 
 	if columns[0] == "*" {
-		for i := range columns {
+		for i := range *tableSchema.Columns {
 			result[i] = true
 		}
 	} else {

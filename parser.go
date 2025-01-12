@@ -193,13 +193,13 @@ func (p *Parser) getCreateColumn() (CreateColumn, error) {
 
     if !p.isIdentifier() {
         fmt.Println(p.current())
-        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок")
+        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок1")
     }
 
     name := p.next().Value
 
     if !p.isIdentifier() {
-        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок")
+        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок2")
     }
     
     typeText := strings.ToUpper(p.next().Value)
@@ -207,7 +207,7 @@ func (p *Parser) getCreateColumn() (CreateColumn, error) {
     columnType := columnTypes[typeText]
 
     if columnType == 0 {
-        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок")
+        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок3")
     }
 
 	autoIncrement := false

@@ -14,6 +14,8 @@ const (
 	TYPE_DIGIT
 	TYPE_STRING
 	TYPE_BOOL
+	TYPE_DATE
+	TYPE_DATETIME
 	TYPE_OPERATOR
 	TYPE_SYMBOL
 )
@@ -25,24 +27,26 @@ var typeNames = map[int]string{
 	TYPE_DIGIT:      "TYPE_DIGIT",
 	TYPE_STRING:     "TYPE_STRING",
 	TYPE_BOOL:       "TYPE_BOOL",
+	TYPE_DATE:       "TYPE_DATE",
+	TYPE_DATETIME:   "TYPE_DATETIME",
 	TYPE_OPERATOR:   "TYPE_OPERATOR",
 	TYPE_SYMBOL:     "TYPE_SYMBOL",
 }
 
 // Ключевые слова
 var keywords = map[string]bool{
-	"SELECT": true,
-	"FROM":   true,
-	"WHERE":  true,
-	"AND":    true,
-	"CREATE":    true,
-	"TABLE":    true,
-	"DROP": true,
-	"INSERT": true,
-	"INTO": true,
-	"VALUES": true,
-	"UPDATE": true,
-	"SET": true,
+	"SELECT":         true,
+	"FROM":           true,
+	"WHERE":          true,
+	"AND":            true,
+	"CREATE":         true,
+	"TABLE":          true,
+	"DROP":           true,
+	"INSERT":         true,
+	"INTO":           true,
+	"VALUES":         true,
+	"UPDATE":         true,
+	"SET":            true,
 	"AUTO_INCREMENT": true,
 }
 
@@ -231,6 +235,20 @@ func (l *Lexer) getStringLiteralToken() (Token, error) {
 
 	if !hasEndStringLiteral {
 		return Token{}, fmt.Errorf("отсутствует закрывающая кавычка для строки")
+	}
+
+	if isValidDate(builder.String()) {
+		return Token{
+			Type:  TYPE_DATE,
+			Value: builder.String(),
+		}, nil
+	}
+
+	if isValidDatetime(builder.String()) {
+		return Token{
+			Type:  TYPE_DATETIME,
+			Value: builder.String(),
+		}, nil
 	}
 
 	return Token{

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
     "encoding/json"
     "strings"
+    "time"
 )
 
 const databaseDir = "database"
@@ -131,4 +132,24 @@ func writeDataInTable(data []byte, tableName string) error {
 	}
 
 	return nil
+}
+
+func isValidDate(str string) bool {
+    _, err := time.Parse("2006-01-02", str)
+
+    if err == nil {
+        return true
+    }
+
+    return false
+}
+
+func isValidDatetime(str string) bool {
+    _, err := time.Parse("2006-01-02 15:04:05", str)
+
+    if err == nil {
+        return true
+    }
+
+    return false
 }

@@ -8,6 +8,8 @@ var columnTypes = map[string]int{
 	"INT":  TYPE_DIGIT,
 	"TEXT": TYPE_STRING,
 	"BOOL": TYPE_BOOL,
+	"DATE": TYPE_DATE,
+	"DATETIME": TYPE_DATETIME,
 }
 
 type CreateColumn struct {
