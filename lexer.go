@@ -18,6 +18,7 @@ const (
 	TYPE_DATETIME
 	TYPE_OPERATOR
 	TYPE_SYMBOL
+	TYPE_NULL
 )
 
 var typeNames = map[int]string{
@@ -31,6 +32,7 @@ var typeNames = map[int]string{
 	TYPE_DATETIME:   "TYPE_DATETIME",
 	TYPE_OPERATOR:   "TYPE_OPERATOR",
 	TYPE_SYMBOL:     "TYPE_SYMBOL",
+	TYPE_NULL:       "TYPE_NULL",
 }
 
 // Ключевые слова
@@ -48,6 +50,7 @@ var keywords = map[string]bool{
 	"UPDATE":         true,
 	"SET":            true,
 	"AUTO_INCREMENT": true,
+	"NOT":            true,
 }
 
 // Булевы выражения
@@ -72,6 +75,11 @@ var symbols = map[string]bool{
 	"(": true,
 	")": true,
 	";": true,
+}
+
+// NULL
+var null = map[string]bool{
+	"NULL": true,
 }
 
 type Lexer struct {
@@ -198,6 +206,9 @@ func (l *Lexer) getStringToken() Token {
 		result = strings.ToUpper(result)
 	} else if bools[strings.ToUpper(result)] {
 		tokenType = TYPE_BOOL
+		result = strings.ToUpper(result)
+	} else if null[strings.ToUpper(result)] {
+		tokenType = TYPE_NULL
 		result = strings.ToUpper(result)
 	} else {
 		tokenType = TYPE_IDENTIFIER

@@ -16,6 +16,7 @@ type CreateColumn struct {
 	Name string
 	Type int
 	AutoIncrement bool
+	NotNull bool
 }
 
 type CreateQuery struct {
@@ -28,7 +29,7 @@ func (q CreateQuery) String() string {
 }
 
 func (c CreateColumn) String() string {
-	return fmt.Sprintf("\nName: %s\nType: %s\nAutoIncrement: %t", c.Name, typeNames[c.Type], c.AutoIncrement)
+	return fmt.Sprintf("\nName: %s\nType: %s\nAutoIncrement: %t\nNotNull: %t", c.Name, typeNames[c.Type], c.AutoIncrement, c.NotNull)
 }
 
 func (q CreateQuery) QueryType() string {

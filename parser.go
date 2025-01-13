@@ -124,6 +124,10 @@ func (p *Parser) isBool() bool {
     return p.current().Type == TYPE_BOOL
 }
 
+func (p *Parser) isNull() bool {
+    return p.current().Type == TYPE_NULL
+}
+
 func (p *Parser) isComma() bool {
     return p.isSymbol() && p.current().Value == ","
 }
@@ -142,6 +146,10 @@ func (p *Parser) isAndKeyword() bool {
 
 func (p *Parser) isAutoIncrementKeyword() bool {
     return p.isKeyword() && p.current().Value == "AUTO_INCREMENT"
+}
+
+func (p *Parser) isNotKeyword() bool {
+    return p.isKeyword() && p.current().Value == "NOT"
 }
 
 func (p *Parser) isOpenParen() bool {
@@ -192,7 +200,6 @@ func (p *Parser) getCreateColumn() (CreateColumn, error) {
     nilCreateColumn := CreateColumn{}
 
     if !p.isIdentifier() {
-        fmt.Println(p.current())
         return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок1")
     }
 
@@ -215,12 +222,32 @@ func (p *Parser) getCreateColumn() (CreateColumn, error) {
 	if p.isAutoIncrementKeyword() {
 		autoIncrement = true
 		p.next()
-	} 
+	}
+
+	notNull := false
+
+	if p.isNotKeyword() {
+		p.next()
+
+		if !p.isNull() {
+			return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок4")
+		}
+
+		p.next()
+
+		notNull = true
+	}
+
+	if p.isNull() {
+		notNull = false
+		p.next()
+	}
 
     return CreateColumn{
         Name: name,
         Type: columnType,
 		AutoIncrement: autoIncrement,
+		NotNull: notNull,
     }, nil
 }
 

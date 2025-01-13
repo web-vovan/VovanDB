@@ -21,6 +21,7 @@ type ColumnSchema struct {
 	Name          string `json:"name"`
 	Type          int    `json:"type"`
 	AutoIncrement bool   `json:"autoIncrement"`
+	NotNull       bool   `json:"notNull"`
 }
 
 func (s TableSchema) String() string {

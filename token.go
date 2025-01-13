@@ -8,7 +8,7 @@ type Token struct {
 }
 
 func (t Token) String() string {
-	return fmt.Sprintf("Type: %s, Value: %s", typeNames[t.Type], t.Value)
+	return fmt.Sprintf("Type: %s;Value: %s ||", typeNames[t.Type], t.Value)
 }
 
 func printTokens(tokens []Token) {

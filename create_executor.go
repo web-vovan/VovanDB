@@ -28,12 +28,13 @@ func createExecutor(s CreateQuery) error {
 			Name:          column.Name,
 			Type:          column.Type,
 			AutoIncrement: column.AutoIncrement,
+			NotNull:       column.NotNull,
 		})
 	}
 
 	// Устанавливаем значение для колонок с auto_increment
 	autoIncrementValues := make(map[string]int)
-	
+
 	for _, column := range columns {
 		if column.AutoIncrement {
 			autoIncrementValues[column.Name] = 0
@@ -41,8 +42,8 @@ func createExecutor(s CreateQuery) error {
 	}
 
 	schema := TableSchema{
-		TableName: tableName,
-		Columns:   &columns,
+		TableName:      tableName,
+		Columns:        &columns,
 		AutoIncrements: autoIncrementValues,
 	}
 
