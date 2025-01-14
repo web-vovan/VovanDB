@@ -168,19 +168,19 @@ func (p *Parser) getCondition() (Condition, error) {
     nilCondition := Condition{}
 
     if !p.isIdentifier() {
-        return nilCondition, fmt.Errorf("неверная структура в условии where")
+        return nilCondition, fmt.Errorf("неверная структура в условии where, нет идентификатора")
     }
 
     column := p.next().Value
 
     if !p.isOperator() {
-        return nilCondition, fmt.Errorf("неверная структура в условии where")
+        return nilCondition, fmt.Errorf("неверная структура в условии where, нет оператора")
     }
 
     operator := p.next().Value
 
-    if !p.isString() && !p.isDigit() && !p.isBool() {
-        return nilCondition, fmt.Errorf("неверная структура в условии where")
+    if !p.isString() && !p.isDigit() && !p.isBool() && !p.isNull() {
+        return nilCondition, fmt.Errorf("неверная структура в условии where, неподдерживаемый тип в условии")
     }
 
     value := p.current().Value

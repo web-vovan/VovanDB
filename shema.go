@@ -54,6 +54,18 @@ func (s *TableSchema) hasColumnInSchema(columnName string) bool {
 	return false
 }
 
+// Колонка
+func (s *TableSchema) getColumn(columnName string) (ColumnSchema, error) {
+	for _, c := range *s.Columns {
+		if c.Name == columnName {
+			return c, nil
+		}
+	}
+
+	return ColumnSchema{}, fmt.Errorf("колонки %s нет в схеме таблицы %s", columnName, s.TableName)
+}
+
+
 // Тип колонки
 func (s *TableSchema) getColumnType(columnName string) (int, error) {
 	for _, c := range *s.Columns {

@@ -174,6 +174,16 @@ func validateInsertQuery(s InsertQuery) error {
 	// Сравниваем типы вставляемых значений
 	for i, rowValues := range s.Values {
 		for j, value := range rowValues {
+			schemaColumn := (*schema.Columns)[mapColumns[j]]
+
+			if !schemaColumn.NotNull && value.Type == TYPE_NULL {
+				continue
+			}
+
+			if schemaColumn.NotNull && value.Type == TYPE_NULL {
+				return fmt.Errorf("запрос невалиден, в строке %d не может быть принят null ", i+1)
+			}
+
 			if value.Type != (*schema.Columns)[mapColumns[j]].Type {
 				return fmt.Errorf("запрос невалиден, в строке %d неверный тип ", i+1)
 			}
@@ -248,13 +258,21 @@ func validateConditions(schema TableSchema, conditions []Condition) error {
 
 	// Сравниваем типы в where
 	for _, c := range conditions {
-		columnType, err := schema.getColumnType(c.Column)
+		schemaColumn, err := schema.getColumn(c.Column)
 
 		if err != nil {
 			return err
 		}
 
-		if columnType != c.ValueType {
+		if !schemaColumn.NotNull && c.ValueType == TYPE_NULL {
+			continue
+		}
+
+		if schemaColumn.NotNull && c.ValueType == TYPE_NULL {
+			return fmt.Errorf("для колонки %s в условии where не может быть установлен null", c.Column)
+		}
+
+		if schemaColumn.Type != c.ValueType {
 			return fmt.Errorf("неверный тип колонки %s в условии where", c.Column)
 		}
 	}

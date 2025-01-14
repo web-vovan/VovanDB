@@ -58,7 +58,11 @@ func selectExecutor(s SelectQuery) error {
 				continue
 			}
 
-			if (*tableSchema.Columns)[j].Type == TYPE_DIGIT || (*tableSchema.Columns)[j].Type == TYPE_BOOL {
+			schemaColumn := (*tableSchema.Columns)[j]
+
+			if schemaColumn.Type == TYPE_DIGIT ||
+				schemaColumn.Type == TYPE_BOOL ||
+				(!schemaColumn.NotNull && data == "NULL") {
 				builder.WriteString("\"" + (*tableSchema.Columns)[j].Name + "\"" + ":" + data)
 			} else {
 				builder.WriteString("\"" + (*tableSchema.Columns)[j].Name + "\"" + ":\"" + data + "\"")
