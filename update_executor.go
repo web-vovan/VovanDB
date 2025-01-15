@@ -6,13 +6,13 @@ import (
 	"os"
 )
 
-func updateExecutor(s UpdateQuery) error {
+func updateExecutor(s UpdateQuery) (string, error) {
 	tableName := s.Table
 
 	err := validateUpdateQuery(s)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Загружаем схему
@@ -22,19 +22,19 @@ func updateExecutor(s UpdateQuery) error {
 	tableData, err := getTableData(tableName)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Индексы подходящих строк
 	matchingRowIndices, err := getMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Нет строк для обновления
 	if len(matchingRowIndices) == 0 {
-		return nil
+		return "успешно обновлено 0 строк",nil
 	}
 
 	// Значения для колонок
@@ -44,7 +44,7 @@ func updateExecutor(s UpdateQuery) error {
 		i, err := tableSchema.getColumnIndex(value.ColumnName)
 
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		columnValues[i] = value
@@ -73,7 +73,7 @@ func updateExecutor(s UpdateQuery) error {
 	file, err := os.Create(getPathTableData(tableName))
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	defer file.Close()
@@ -81,10 +81,10 @@ func updateExecutor(s UpdateQuery) error {
 	_, err = file.Write(updateData.Bytes())
 
 	if err != nil {
-		return fmt.Errorf("не удалось записать данные в файл: %w", err)
+		return "", fmt.Errorf("не удалось записать данные в файл: %w", err)
 	}
 
-	return nil
+	return fmt.Sprintf("успешно обновлено %d строк", len(matchingRowIndices)), nil
 }
 
 // Получение строки с данными

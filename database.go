@@ -1,12 +1,20 @@
 package vovanDB
 
 import (
-	"fmt"
+	"encoding/json"
 	"runtime"
 	"time"
 )
 
-func Execute(sql string) (string, error) {
+type ExecuteResult struct {
+	Success bool   `json:"success"`
+	Data    string `json:"data"`
+	Error   string `json:"error"`
+	Time    string `json:"time"`
+	Memory  string `json:"memory"`
+}
+
+func Execute(sql string) string {
 	start := time.Now()
 
 	// Лексический анализатор
@@ -16,7 +24,12 @@ func Execute(sql string) (string, error) {
 	tokens, err := lexer.Analyze()
 
 	if err != nil {
-		return "", err
+		result, _ := json.Marshal(
+			ExecuteResult{
+				Success: false,
+				Error:   err.Error(),
+			})
+		return string(result)
 	}
 
 	// Парсер
@@ -26,17 +39,27 @@ func Execute(sql string) (string, error) {
 	sqlQuery, err := parser.parse()
 
 	if err != nil {
-		return "", err
+		result, _ := json.Marshal(
+			ExecuteResult{
+				Success: false,
+				Error:   err.Error(),
+			})
+		return string(result)
 	}
 
 	// Executor
 	executor := NewExecutor(sqlQuery)
 
 	// Выполняем запрос
-	err = executor.executeQuery()
+	data, err := executor.executeQuery()
 
 	if err != nil {
-		return "", err
+		result, _ := json.Marshal(
+			ExecuteResult{
+				Success: false,
+				Error:   err.Error(),
+			})
+		return string(result)
 	}
 
 	duration := time.Since(start)
@@ -44,21 +67,13 @@ func Execute(sql string) (string, error) {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 
-	statisticData := fmt.Sprintf("время выполнения: %s \nвыделено памяти: %s", duration.String(), humanReadableBytes(memStats.Alloc))
-
-	return statisticData, nil
-}
-
-func humanReadableBytes(bytes uint64) string {
-	const uint = 1024
-
-	if bytes < uint {
-		return fmt.Sprintf("%d B", bytes)
-	}
-
-	if bytes < uint * uint {
-		return fmt.Sprintf("%d KB", bytes/uint)
-	}
-
-	return fmt.Sprintf("%d MB", bytes/(uint * uint))
+	result, _ := json.Marshal(
+		ExecuteResult{
+			Success: true,
+			Data:    data,
+			Error:   "",
+			Time:    duration.String(),
+			Memory:  humanReadableBytes(memStats.Alloc),
+		})
+	return string(result)
 }

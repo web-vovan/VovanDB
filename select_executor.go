@@ -4,13 +4,13 @@ import (
 	"strings"
 )
 
-func selectExecutor(s SelectQuery) error {
+func selectExecutor(s SelectQuery) (string, error) {
 	tableName := s.Table
 
 	err := validateSelectQuery(s)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Загружаем схему
@@ -20,21 +20,21 @@ func selectExecutor(s SelectQuery) error {
 	tableData, err := getTableData(tableName)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Индексы неподходящих строк
 	notMatchingRowIndices, err := getNotMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Индексы подходящих колонок
 	matchingColumnIndices, err := getMatchingColumnIndices(&tableSchema, s.Columns)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	var builder strings.Builder
@@ -82,5 +82,5 @@ func selectExecutor(s SelectQuery) error {
 
 	builder.WriteString("]")
 
-	return nil
+	return builder.String(), nil
 }

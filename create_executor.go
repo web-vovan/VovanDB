@@ -4,20 +4,20 @@ import (
 	"fmt"
 )
 
-func createExecutor(s CreateQuery) error {
+func createExecutor(s CreateQuery) (string, error) {
 	tableName := s.Table
 
 	err := validateCreateQuery(s)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Создаем файлы таблицы
 	err = createTableFiles(tableName)
 
 	if err != nil {
-		return fmt.Errorf("не удалось создать файлы для таблицы: %s", tableName)
+		return "", fmt.Errorf("не удалось создать файлы для таблицы: %s", tableName)
 	}
 
 	// Пишем мета-данные в файл схемы
@@ -50,8 +50,8 @@ func createExecutor(s CreateQuery) error {
 	err = schema.writeToFile()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return fmt.Sprintf("таблица %s успешно создана", tableName), nil
 }

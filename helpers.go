@@ -11,6 +11,20 @@ import (
 
 const databaseDir = "database"
 
+func humanReadableBytes(bytes uint64) string {
+	const uint = 1024
+
+	if bytes < uint {
+		return fmt.Sprintf("%d B", bytes)
+	}
+
+	if bytes < uint * uint {
+		return fmt.Sprintf("%d KB", bytes/uint)
+	}
+
+	return fmt.Sprintf("%d MB", bytes/(uint * uint))
+}
+
 func fileExists(path string) bool {
     _, err := os.Stat(path)
 

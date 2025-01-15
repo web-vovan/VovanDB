@@ -2,21 +2,22 @@ package vovanDB
 
 import (
 	"bytes"
+	"fmt"
 	"strconv"
 )
 
-func insertExecutor(s InsertQuery) error {
+func insertExecutor(s InsertQuery) (string, error) {
 	tableName := s.Table
 	schema, err := getSchema(tableName)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = validateInsertQuery(s)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	var insertData bytes.Buffer
@@ -49,16 +50,16 @@ func insertExecutor(s InsertQuery) error {
 	err = writeDataInTable(insertData.Bytes(), tableName)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = schema.writeToFile()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return fmt.Sprintf("данные в таблицу %s успешно добавлены", tableName), nil
 }
 
 // Получение строки с данными

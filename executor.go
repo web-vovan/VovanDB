@@ -12,73 +12,79 @@ func NewExecutor(s SQLQuery) *Executor {
 	}
 }
 
-func (e *Executor) executeQuery() error {
-	var err error
-
+func (e *Executor) executeQuery() (string, error) {
 	switch e.sqlQuery.(type) {
 	case CreateQuery:
 		createQuery, ok := e.sqlQuery.(CreateQuery)
 
 		if !ok {
-			return fmt.Errorf("ошибка при преобразовании типа CreateQuery")
+			return "", fmt.Errorf("ошибка при преобразовании типа CreateQuery")
 		}
 
-		err = createExecutor(createQuery)
+		data, err := createExecutor(createQuery)
 
 		if err != nil {
-			return err
+			return "", err
 		}
+
+		return data, nil
 	case DropQuery:
 		dropQuery, ok := e.sqlQuery.(DropQuery)
 
 		if !ok {
-			return fmt.Errorf("ошибка при преобразовании типа DropQuery")
+			return "", fmt.Errorf("ошибка при преобразовании типа DropQuery")
 		}
 
-		err = dropExecutor(dropQuery)
+		data, err := dropExecutor(dropQuery)
 
 		if err != nil {
-			return err
+			return "", err
 		}
+
+		return data, nil
 	case InsertQuery:
 		insertQuery, ok := e.sqlQuery.(InsertQuery)
 
 		if !ok {
-			return fmt.Errorf("ошибка при преобразовании типа InsertQuery")
+			return "", fmt.Errorf("ошибка при преобразовании типа InsertQuery")
 		}
 
-		err = insertExecutor(insertQuery)
+		data, err := insertExecutor(insertQuery)
 
 		if err != nil {
-			return err
+			return "", err
 		}
+
+		return data, nil
 	case SelectQuery:
 		selectQuery, ok := e.sqlQuery.(SelectQuery)
 
 		if !ok {
-			return fmt.Errorf("ошибка при преобразовании типа InsertQuery")
+			return "", fmt.Errorf("ошибка при преобразовании типа InsertQuery")
 		}
 
-		err = selectExecutor(selectQuery)
+		data, err := selectExecutor(selectQuery)
 
 		if err != nil {
-			return err
+			return "", err
 		}
+
+		return data, err
 	case UpdateQuery:
 		updateQuery, ok := e.sqlQuery.(UpdateQuery)
 
 		if !ok {
-			return fmt.Errorf("ошибка при преобразовании типа InsertQuery")
+			return "", fmt.Errorf("ошибка при преобразовании типа InsertQuery")
 		}
 
-		err = updateExecutor(updateQuery)
+		data, err := updateExecutor(updateQuery)
 
 		if err != nil {
-			return err
+			return "", err
 		}
-	default:
-		return fmt.Errorf("данный тип запросов не поддерживается")
+
+		return data, err
 	}
 
-	return nil
+	return "", fmt.Errorf("данный тип запросов не поддерживается")
 }
