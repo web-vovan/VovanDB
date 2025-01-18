@@ -9,8 +9,6 @@ import (
     "time"
 )
 
-const databaseDir = "database"
-
 func humanReadableBytes(bytes uint64) string {
 	const uint = 1024
 
@@ -36,11 +34,11 @@ func fileExists(path string) bool {
 }
 
 func getPathTableSchema(table string) string {
-    return filepath.Join(databaseDir, table +".schema")
+    return filepath.Join(getDataBaseDir(), table +".schema")
 }
 
 func getPathTableData(table string) string {
-    return filepath.Join(databaseDir, table + ".data")
+    return filepath.Join(getDataBaseDir(), table + ".data")
 }
 
 func createTableFiles(tableName string) error {
@@ -71,13 +69,13 @@ func createTableFiles(tableName string) error {
 }
 
 func createDatabaseDirIfNotExists() error {
-    info, err := os.Stat(databaseDir)
+    info, err := os.Stat(getDataBaseDir())
 
     if os.IsNotExist(err) || !info.IsDir() {
-        err := os.MkdirAll(databaseDir, os.ModePerm)
+        err := os.MkdirAll(getDataBaseDir(), os.ModePerm)
 
         if err != nil {
-            return fmt.Errorf("не удалось создать директорию %s для хранения данных", databaseDir)
+            return fmt.Errorf("не удалось создать директорию %s для хранения данных", getDataBaseDir())
         }
     }
 
@@ -166,4 +164,12 @@ func isValidDatetime(str string) bool {
     }
 
     return false
+}
+
+func getDataBaseDir() string {
+    if os.Getenv("VOVAN_DB_DATABASE_DIR") == "" {
+        return "database"
+    }
+
+    return os.Getenv("VOVAN_DB_DATABASE_DIR")
 }

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"runtime"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 type ExecuteResult struct {
@@ -16,6 +18,9 @@ type ExecuteResult struct {
 
 func Execute(sql string) string {
 	start := time.Now()
+
+	// Чтение .env файла
+	godotenv.Load(".env")
 
 	// Лексический анализатор
 	lexer := NewLexer(sql)
