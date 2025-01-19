@@ -173,3 +173,33 @@ func getDataBaseDir() string {
 
     return os.Getenv("VOVAN_DB_DATABASE_DIR")
 }
+
+func clearAllDatabase() {
+    os.RemoveAll(getDataBaseDir())
+}
+
+func createTestDataBase() error {
+    sql := `
+        CREATE TABLE users (
+            id int AUTO_INCREMENT,
+            name text NULL,
+            age int,
+            is_admin bool,
+            date date
+        );`
+
+    result := Execute(sql)
+
+    executeResult := ExecuteResult{}
+    err := json.Unmarshal([]byte(result), &executeResult)
+
+    if err != nil {
+        return fmt.Errorf("не удалось создать тестовую таблицу: ошибка при декодировании результата")
+    }
+
+    if executeResult.Success != true {
+        return fmt.Errorf("не удалось создать тестовую таблицу: %", executeResult.Error)
+    }
+
+    return nil
+}
