@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestCreateExecutor(t *testing.T) {
+func TestSelectExecutor(t *testing.T) {
 	type TestData struct {
 		testName        string
 		sql             string
@@ -16,20 +16,43 @@ func TestCreateExecutor(t *testing.T) {
 
 	defer clearAllDatabase()
 
+	err := createTestDataBase()
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = seedTestDatabase()
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
 	testData := []TestData{
 		{
-			testName: "success create table",
+			testName: "success select table",
 			sql: `
-			CREATE TABLE users (
-				id int AUTO_INCREMENT,
-				name text NULL,
-				age int,
-				is_admin bool,
-				date date
-			);
+				SELECT *
+				FROM users
+				WHERE
+				is_admin = false
 			`,
 			expectedSuccess: true,
-			expectedData:    "таблица users успешно создана",
+			expectedData:    "[{\"id\":2,\"name\":\"katya\",\"age\":33,\"is_admin\":FALSE,\"date\":\"2025-01-28\"}{\"id\":3,\"name\":\"sacha\",\"age\":38,\"is_admin\":FALSE,\"date\":\"2025-01-28\"}]",
+			expectedError:   "",
+		},
+		{
+			testName: "success select table",
+			sql: `
+				SELECT id, name
+				FROM users
+				WHERE
+				is_admin = false
+			`,
+			expectedSuccess: true,
+			expectedData:    "[{\"id\":2,\"name\":\"katya\"}{\"id\":3,\"name\":\"sacha\"}]",
 			expectedError:   "",
 		},
 	}

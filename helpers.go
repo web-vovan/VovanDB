@@ -1,12 +1,12 @@
 package vovanDB
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-    "encoding/json"
-    "strings"
-    "time"
+	"strings"
+	"time"
 )
 
 func humanReadableBytes(bytes uint64) string {
@@ -16,75 +16,75 @@ func humanReadableBytes(bytes uint64) string {
 		return fmt.Sprintf("%d B", bytes)
 	}
 
-	if bytes < uint * uint {
+	if bytes < uint*uint {
 		return fmt.Sprintf("%d KB", bytes/uint)
 	}
 
-	return fmt.Sprintf("%d MB", bytes/(uint * uint))
+	return fmt.Sprintf("%d MB", bytes/(uint*uint))
 }
 
 func fileExists(path string) bool {
-    _, err := os.Stat(path)
+	_, err := os.Stat(path)
 
-    if os.IsNotExist(err) {
-        return false
-    }
+	if os.IsNotExist(err) {
+		return false
+	}
 
-    return err == nil
+	return err == nil
 }
 
 func getPathTableSchema(table string) string {
-    return filepath.Join(getDataBaseDir(), table +".schema")
+	return filepath.Join(getDataBaseDir(), table+".schema")
 }
 
 func getPathTableData(table string) string {
-    return filepath.Join(getDataBaseDir(), table + ".data")
+	return filepath.Join(getDataBaseDir(), table+".data")
 }
 
 func createTableFiles(tableName string) error {
-    err := createDatabaseDirIfNotExists()
+	err := createDatabaseDirIfNotExists()
 
-    if err != nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 
-    // Создаем файл схемы
-    schemaFile, err := os.Create(getPathTableSchema(tableName))
+	// Создаем файл схемы
+	schemaFile, err := os.Create(getPathTableSchema(tableName))
 
-    if err != nil {
-        return fmt.Errorf("не удалось создать файл схемы : %s", getPathTableSchema(tableName))
-    }
+	if err != nil {
+		return fmt.Errorf("не удалось создать файл схемы : %s", getPathTableSchema(tableName))
+	}
 
-    // Создаем файл с данными
-    dataFile, err := os.Create(getPathTableData(tableName))
+	// Создаем файл с данными
+	dataFile, err := os.Create(getPathTableData(tableName))
 
-    if err != nil {
-        return fmt.Errorf("не удалось создать файл схемы : %s", getPathTableData(tableName))
-    }
+	if err != nil {
+		return fmt.Errorf("не удалось создать файл схемы : %s", getPathTableData(tableName))
+	}
 
-    defer schemaFile.Close()
-    defer dataFile.Close()
+	defer schemaFile.Close()
+	defer dataFile.Close()
 
-    return nil
+	return nil
 }
 
 func createDatabaseDirIfNotExists() error {
-    info, err := os.Stat(getDataBaseDir())
+	info, err := os.Stat(getDataBaseDir())
 
-    if os.IsNotExist(err) || !info.IsDir() {
-        err := os.MkdirAll(getDataBaseDir(), os.ModePerm)
+	if os.IsNotExist(err) || !info.IsDir() {
+		err := os.MkdirAll(getDataBaseDir(), os.ModePerm)
 
-        if err != nil {
-            return fmt.Errorf("не удалось создать директорию %s для хранения данных", getDataBaseDir())
-        }
-    }
+		if err != nil {
+			return fmt.Errorf("не удалось создать директорию %s для хранения данных", getDataBaseDir())
+		}
+	}
 
-    return nil
+	return nil
 }
 
 // Получение схемы таблицы
 func getSchema(tableName string) (TableSchema, error) {
-    var schema TableSchema
+	var schema TableSchema
 	schemaData, err := os.ReadFile(getPathTableSchema(tableName))
 
 	if err != nil {
@@ -97,39 +97,39 @@ func getSchema(tableName string) (TableSchema, error) {
 		return schema, fmt.Errorf("ошибка при декодировании файла схемы для таблицы %s", tableName)
 	}
 
-    return schema, nil
+	return schema, nil
 }
 
 // Получение данных таблицы
 func getTableData(tableName string) ([][]string, error) {
-    var result [][]string
-    rawData, err := os.ReadFile(getPathTableData(tableName))
+	var result [][]string
+	rawData, err := os.ReadFile(getPathTableData(tableName))
 
-    if err != nil {
-        return result, fmt.Errorf("не удалось прочитать файл с данными таблицы %s", tableName)
-    }
+	if err != nil {
+		return result, fmt.Errorf("не удалось прочитать файл с данными таблицы %s", tableName)
+	}
 
-    for _, line := range strings.Split(string(rawData), "\n") {
-        if line != "" {
-            result = append(result, strings.Split(line, ";"))
-        }
-    }
+	for _, line := range strings.Split(string(rawData), "\n") {
+		if line != "" {
+			result = append(result, strings.Split(line, ";"))
+		}
+	}
 
-    return result, nil
+	return result, nil
 }
 
 func hasStringInSlice(value string, slice []string) bool {
-    for _, i := range slice {
-        if  i == value {
-            return true
-        }
-    }
+	for _, i := range slice {
+		if i == value {
+			return true
+		}
+	}
 
-    return false
+	return false
 }
 
 func writeDataInTable(data []byte, tableName string) error {
-    file, err := os.OpenFile(getPathTableData(tableName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(getPathTableData(tableName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
 	defer file.Close()
 
@@ -147,39 +147,39 @@ func writeDataInTable(data []byte, tableName string) error {
 }
 
 func isValidDate(str string) bool {
-    _, err := time.Parse("2006-01-02", str)
+	_, err := time.Parse("2006-01-02", str)
 
-    if err == nil {
-        return true
-    }
+	if err == nil {
+		return true
+	}
 
-    return false
+	return false
 }
 
 func isValidDatetime(str string) bool {
-    _, err := time.Parse("2006-01-02 15:04:05", str)
+	_, err := time.Parse("2006-01-02 15:04:05", str)
 
-    if err == nil {
-        return true
-    }
+	if err == nil {
+		return true
+	}
 
-    return false
+	return false
 }
 
 func getDataBaseDir() string {
-    if os.Getenv("VOVAN_DB_DATABASE_DIR") == "" {
-        return "database"
-    }
+	if os.Getenv("VOVAN_DB_DATABASE_DIR") == "" {
+		return "database"
+	}
 
-    return os.Getenv("VOVAN_DB_DATABASE_DIR")
+	return os.Getenv("VOVAN_DB_DATABASE_DIR")
 }
 
 func clearAllDatabase() {
-    os.RemoveAll(getDataBaseDir())
+	os.RemoveAll(getDataBaseDir())
 }
 
 func createTestDataBase() error {
-    sql := `
+	sql := `
         CREATE TABLE users (
             id int AUTO_INCREMENT,
             name text NULL,
@@ -188,18 +188,43 @@ func createTestDataBase() error {
             date date
         );`
 
-    result := Execute(sql)
+	result := Execute(sql)
 
-    executeResult := ExecuteResult{}
-    err := json.Unmarshal([]byte(result), &executeResult)
+	executeResult := ExecuteResult{}
+	err := json.Unmarshal([]byte(result), &executeResult)
 
-    if err != nil {
-        return fmt.Errorf("не удалось создать тестовую таблицу: ошибка при декодировании результата")
-    }
+	if err != nil {
+		return fmt.Errorf("не удалось создать тестовую таблицу: ошибка при декодировании результата")
+	}
 
-    if executeResult.Success != true {
-        return fmt.Errorf("не удалось создать тестовую таблицу: %", executeResult.Error)
-    }
+	if executeResult.Success != true {
+		return fmt.Errorf("не удалось создать тестовую таблицу: %s", executeResult.Error)
+	}
 
-    return nil
+	return nil
+}
+
+func seedTestDatabase() error {
+	sql := `
+        INSERT INTO users (id, name, age, is_admin, date)
+        VALUES
+        (1, 'vova', 38, true, '2025-01-28'),
+        (2, 'katya', 33, false, '2025-01-28'),
+        (3, 'sacha', 38, false, '2025-01-28');
+    `
+
+	result := Execute(sql)
+
+	executeResult := ExecuteResult{}
+	err := json.Unmarshal([]byte(result), &executeResult)
+
+	if err != nil {
+		return fmt.Errorf("не удалось наполнить таблицу тестовыми данными: ошибка при декодировании результата")
+	}
+
+	if executeResult.Success != true {
+		return fmt.Errorf("не удалось наполнить таблицу тестовыми данными: %s", executeResult.Error)
+	}
+
+	return nil
 }
