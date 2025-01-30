@@ -1,7 +1,8 @@
-package vovanDB
+package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"runtime"
 	"time"
 
@@ -16,7 +17,19 @@ type ExecuteResult struct {
 	Memory  string `json:"memory"`
 }
 
-func Execute(sql string) string {
+func main() {
+	sql := `
+	CREATE TABLE Customers (
+		id int AUTO_INCREMENT,
+		CustomerName text NULL,
+		ContactName text,
+		Address text not null,
+		City text,
+		Country text,
+		date date
+	);
+	`
+
 	start := time.Now()
 
 	// Чтение .env файла
@@ -34,7 +47,9 @@ func Execute(sql string) string {
 				Success: false,
 				Error:   err.Error(),
 			})
-		return string(result)
+		fmt.Println(string(result))
+
+		return
 	}
 
 	// Парсер
@@ -49,7 +64,9 @@ func Execute(sql string) string {
 				Success: false,
 				Error:   err.Error(),
 			})
-		return string(result)
+		fmt.Println(string(result))
+
+		return
 	}
 
 	// Executor
@@ -64,7 +81,9 @@ func Execute(sql string) string {
 				Success: false,
 				Error:   err.Error(),
 			})
-		return string(result)
+		fmt.Println(string(result))
+
+		return
 	}
 
 	duration := time.Since(start)
@@ -80,5 +99,6 @@ func Execute(sql string) string {
 			Time:    duration.String(),
 			Memory:  humanReadableBytes(memStats.Alloc),
 		})
-	return string(result)
+
+	fmt.Println(string(result))
 }

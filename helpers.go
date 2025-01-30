@@ -1,4 +1,4 @@
-package vovanDB
+package main
 
 import (
 	"encoding/json"
@@ -178,53 +178,53 @@ func clearAllDatabase() {
 	os.RemoveAll(getDataBaseDir())
 }
 
-func createTestDataBase() error {
-	sql := `
-        CREATE TABLE users (
-            id int AUTO_INCREMENT,
-            name text NULL,
-            age int,
-            is_admin bool,
-            date date
-        );`
+// func createTestDataBase() error {
+// 	sql := `
+//         CREATE TABLE users (
+//             id int AUTO_INCREMENT,
+//             name text NULL,
+//             age int,
+//             is_admin bool,
+//             date date
+//         );`
 
-	result := Execute(sql)
+// 	result := Execute(sql)
 
-	executeResult := ExecuteResult{}
-	err := json.Unmarshal([]byte(result), &executeResult)
+// 	executeResult := ExecuteResult{}
+// 	err := json.Unmarshal([]byte(result), &executeResult)
 
-	if err != nil {
-		return fmt.Errorf("не удалось создать тестовую таблицу: ошибка при декодировании результата")
-	}
+// 	if err != nil {
+// 		return fmt.Errorf("не удалось создать тестовую таблицу: ошибка при декодировании результата")
+// 	}
 
-	if executeResult.Success != true {
-		return fmt.Errorf("не удалось создать тестовую таблицу: %s", executeResult.Error)
-	}
+// 	if executeResult.Success != true {
+// 		return fmt.Errorf("не удалось создать тестовую таблицу: %s", executeResult.Error)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
-func seedTestDatabase() error {
-	sql := `
-        INSERT INTO users (id, name, age, is_admin, date)
-        VALUES
-        (1, 'vova', 38, true, '2025-01-28'),
-        (2, 'katya', 33, false, '2025-01-28'),
-        (3, 'sacha', 38, false, '2025-01-28');
-    `
+// func seedTestDatabase() error {
+// 	sql := `
+//         INSERT INTO users (id, name, age, is_admin, date)
+//         VALUES
+//         (1, 'vova', 38, true, '2025-01-28'),
+//         (2, 'katya', 33, false, '2025-01-28'),
+//         (3, 'sacha', 38, false, '2025-01-28');
+//     `
 
-	result := Execute(sql)
+// 	result := Execute(sql)
 
-	executeResult := ExecuteResult{}
-	err := json.Unmarshal([]byte(result), &executeResult)
+// 	executeResult := ExecuteResult{}
+// 	err := json.Unmarshal([]byte(result), &executeResult)
 
-	if err != nil {
-		return fmt.Errorf("не удалось наполнить таблицу тестовыми данными: ошибка при декодировании результата")
-	}
+// 	if err != nil {
+// 		return fmt.Errorf("не удалось наполнить таблицу тестовыми данными: ошибка при декодировании результата")
+// 	}
 
-	if executeResult.Success != true {
-		return fmt.Errorf("не удалось наполнить таблицу тестовыми данными: %s", executeResult.Error)
-	}
+// 	if executeResult.Success != true {
+// 		return fmt.Errorf("не удалось наполнить таблицу тестовыми данными: %s", executeResult.Error)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

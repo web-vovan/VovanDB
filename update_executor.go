@@ -1,4 +1,4 @@
-package vovanDB
+package main
 
 import (
 	"bytes"
