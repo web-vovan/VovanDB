@@ -1,4 +1,4 @@
-package main
+package internal
 
 // Индексы строк, удовлетворяющие фильтру
 func getMatchingRowIndices(tableData *[][]string, tableSchema *TableSchema, conditions *[]Condition) (map[int]bool, error) {

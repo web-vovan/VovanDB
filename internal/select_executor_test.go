@@ -1,11 +1,11 @@
-package main
+package internal
 
 import (
 	"encoding/json"
 	"testing"
 )
 
-func TestUpdateExecutor(t *testing.T) {
+func TestSelectExecutor(t *testing.T) {
 	type TestData struct {
 		testName        string
 		sql             string
@@ -32,15 +32,27 @@ func TestUpdateExecutor(t *testing.T) {
 
 	testData := []TestData{
 		{
-			testName: "success update table",
+			testName: "success select table",
 			sql: `
-				UPDATE users
-				SET is_admin = true
+				SELECT *
+				FROM users
 				WHERE
 				is_admin = false
 			`,
 			expectedSuccess: true,
-			expectedData:    "успешно обновлено 2 строк",
+			expectedData:    "[{\"id\":2,\"name\":\"katya\",\"age\":33,\"is_admin\":FALSE,\"date\":\"2025-01-28\"}{\"id\":3,\"name\":\"sacha\",\"age\":38,\"is_admin\":FALSE,\"date\":\"2025-01-28\"}]",
+			expectedError:   "",
+		},
+		{
+			testName: "success select table",
+			sql: `
+				SELECT id, name
+				FROM users
+				WHERE
+				is_admin = false
+			`,
+			expectedSuccess: true,
+			expectedData:    "[{\"id\":2,\"name\":\"katya\"}{\"id\":3,\"name\":\"sacha\"}]",
 			expectedError:   "",
 		},
 	}
