@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"vovanDB/internal/lexer"
 	"vovanDB/internal/parser"
-	"vovanDB/internal"
+	"vovanDB/internal/executor"
 
 	"github.com/joho/godotenv"
 )
@@ -57,7 +57,7 @@ func Execute(sql string) string {
 	}
 
 	// Executor
-	executor := internal.NewExecutor(sqlQuery)
+	executor := executor.NewExecutor(sqlQuery)
 
 	// Выполняем запрос
 	data, err := executor.ExecuteQuery()

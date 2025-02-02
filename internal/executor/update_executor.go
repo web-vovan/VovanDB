@@ -1,4 +1,4 @@
-package internal
+package executor
 
 import (
 	"bytes"
@@ -6,13 +6,15 @@ import (
 	"os"
 	"vovanDB/internal/helpers"
 	"vovanDB/internal/parser"
+	"vovanDB/internal/validator"
+	"vovanDB/internal"
 	schemaHelpers "vovanDB/internal/schema/helpers"
 )
 
 func updateExecutor(s parser.UpdateQuery) (string, error) {
 	tableName := s.Table
 
-	err := validateUpdateQuery(s)
+	err := validator.ValidateUpdateQuery(s)
 
 	if err != nil {
 		return "", err
@@ -29,7 +31,7 @@ func updateExecutor(s parser.UpdateQuery) (string, error) {
 	}
 
 	// Индексы подходящих строк
-	matchingRowIndices, err := getMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
+	matchingRowIndices, err := internal.GetMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
 
 	if err != nil {
 		return "", err

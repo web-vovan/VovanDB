@@ -1,4 +1,4 @@
-package internal
+package validator
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	schemaHelpers "vovanDB/internal/schema/helpers"
 )
 
-func validateSelectQuery(s parser.SelectQuery) error {
+func ValidateSelectQuery(s parser.SelectQuery) error {
 	tableName := s.Table
 
 	// Существование таблицы
@@ -35,7 +35,7 @@ func validateSelectQuery(s parser.SelectQuery) error {
 		}
 	}
 
-	err = validateConditions(schema, s.Conditions)
+	err = ValidateConditions(schema, s.Conditions)
 
 	if err != nil {
 		return err
@@ -44,7 +44,7 @@ func validateSelectQuery(s parser.SelectQuery) error {
 	return nil
 }
 
-func validateUpdateQuery(s parser.UpdateQuery) error {
+func ValidateUpdateQuery(s parser.UpdateQuery) error {
 	tableName := s.Table
 
 	// Существование таблицы
@@ -79,7 +79,7 @@ func validateUpdateQuery(s parser.UpdateQuery) error {
 		}
 	}
 
-	err = validateConditions(schema, s.Conditions)
+	err = ValidateConditions(schema, s.Conditions)
 
 	if err != nil {
 		return err
@@ -88,7 +88,7 @@ func validateUpdateQuery(s parser.UpdateQuery) error {
 	return nil
 }
 
-func validateCreateQuery(s parser.CreateQuery) error {
+func ValidateCreateQuery(s parser.CreateQuery) error {
 	// Существование таблицы
 	if helpers.FileExists(helpers.GetPathTableSchema(s.Table)) || helpers.FileExists(helpers.GetPathTableData(s.Table)) {
 		return fmt.Errorf("невозможно создать таблицу %s, она уже существует", s.Table)
@@ -115,7 +115,7 @@ func validateCreateQuery(s parser.CreateQuery) error {
 	return nil
 }
 
-func validateDropQuery(s parser.DropQuery) error {
+func ValidateDropQuery(s parser.DropQuery) error {
 	// Существование файлов таблицы
 	if !helpers.FileExists(helpers.GetPathTableSchema(s.Table)) || !helpers.FileExists(helpers.GetPathTableData(s.Table)) {
 		return fmt.Errorf("невозможно удалить таблицу %s, она не существует", s.Table)
@@ -124,7 +124,7 @@ func validateDropQuery(s parser.DropQuery) error {
 	return nil
 }
 
-func validateInsertQuery(s parser.InsertQuery) error {
+func ValidateInsertQuery(s parser.InsertQuery) error {
 	tableName := s.Table
 
 	// Существование таблицы
@@ -197,7 +197,7 @@ func validateInsertQuery(s parser.InsertQuery) error {
 	}
 
 	// Валидируем поля в колонке auto_increment
-	err = validateAutoIncrementInsertQuery(&schema, &s, mapColumns)
+	err = ValidateAutoIncrementInsertQuery(&schema, &s, mapColumns)
 
 	if err != nil {
 		return err
@@ -206,7 +206,7 @@ func validateInsertQuery(s parser.InsertQuery) error {
 	return nil
 }
 
-func validateAutoIncrementInsertQuery(schema *schema.TableSchema, s *parser.InsertQuery, mapColumns map[int]int) error {
+func ValidateAutoIncrementInsertQuery(schema *schema.TableSchema, s *parser.InsertQuery, mapColumns map[int]int) error {
 	// Индекс колонки auto_increment в схеме
 	autoIncrementSchemaIndex := schema.GetAutoIncrementColumnIndex()
 
@@ -254,7 +254,7 @@ func validateAutoIncrementInsertQuery(schema *schema.TableSchema, s *parser.Inse
 	return nil
 }
 
-func validateConditions(schema schema.TableSchema, conditions []condition.Condition) error {
+func ValidateConditions(schema schema.TableSchema, conditions []condition.Condition) error {
 	// Сравниваем названия колонок в where
 	for _, c := range conditions {
 		if !schema.HasColumnInSchema(c.Column) {

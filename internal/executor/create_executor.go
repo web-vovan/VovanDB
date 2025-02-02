@@ -1,16 +1,17 @@
-package internal
+package executor
 
 import (
 	"fmt"
 	"vovanDB/internal/helpers"
 	"vovanDB/internal/schema"
 	"vovanDB/internal/parser"
+	"vovanDB/internal/validator"
 )
 
 func createExecutor(s parser.CreateQuery) (string, error) {
 	tableName := s.Table
 
-	err := validateCreateQuery(s)
+	err := validator.ValidateCreateQuery(s)
 
 	if err != nil {
 		return "", err

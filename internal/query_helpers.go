@@ -6,10 +6,10 @@ import (
 )
 
 // Индексы строк, удовлетворяющие фильтру
-func getMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchema, conditions *[]condition.Condition) (map[int]bool, error) {
+func GetMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchema, conditions *[]condition.Condition) (map[int]bool, error) {
 	var result = make(map[int]bool)
 
-	mapConditions, err := transformConditionsToMap(tableSchema, conditions)
+	mapConditions, err := TransformConditionsToMap(tableSchema, conditions)
 
     if err != nil {
 		return result, err
@@ -33,10 +33,10 @@ func getMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchem
 }
 
 // Индексы строк, неудовлетворяющие фильтру
-func getNotMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchema, conditions *[]condition.Condition) (map[int]bool, error) {
+func GetNotMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchema, conditions *[]condition.Condition) (map[int]bool, error) {
 	var result = make(map[int]bool)
 
-	mapConditions, err := transformConditionsToMap(tableSchema, conditions)
+	mapConditions, err := TransformConditionsToMap(tableSchema, conditions)
 
 	if err != nil {
 		return result, err
@@ -60,7 +60,7 @@ func getNotMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSc
 }
 
 // Преобразование массива с условиями в мапу
-func transformConditionsToMap(tableSchema *schema.TableSchema, conditions *[]condition.Condition) (map[int]condition.Condition, error) {
+func TransformConditionsToMap(tableSchema *schema.TableSchema, conditions *[]condition.Condition) (map[int]condition.Condition, error) {
 	var result = make(map[int]condition.Condition)
 
 	for _, condition := range *conditions {
@@ -77,7 +77,7 @@ func transformConditionsToMap(tableSchema *schema.TableSchema, conditions *[]con
 }
 
 // Индексы колонок из схемы, удовлетворяющие списку
-func getMatchingColumnIndices(tableSchema *schema.TableSchema, columns []string) (map[int]bool, error) {
+func GetMatchingColumnIndices(tableSchema *schema.TableSchema, columns []string) (map[int]bool, error) {
 	var result = make(map[int]bool)
 
 	if columns[0] == "*" {

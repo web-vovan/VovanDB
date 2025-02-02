@@ -1,16 +1,17 @@
-package internal
+package executor
 
 import (
 	"fmt"
 	"os"
 	"vovanDB/internal/helpers"
 	"vovanDB/internal/parser"
+	"vovanDB/internal/validator"
 )
 
 func dropExecutor(s parser.DropQuery) (string, error) {
 	tableName := s.Table
 
-	err := validateDropQuery(s)
+	err := validator.ValidateDropQuery(s)
 
 	if err != nil {
 		return "", err

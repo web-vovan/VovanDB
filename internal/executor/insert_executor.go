@@ -1,4 +1,4 @@
-package internal
+package executor
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"vovanDB/internal/helpers"
 	"vovanDB/internal/parser"
 	schemaHelpers "vovanDB/internal/schema/helpers"
+	"vovanDB/internal/validator"
 )
 
 func insertExecutor(s parser.InsertQuery) (string, error) {
@@ -17,7 +18,7 @@ func insertExecutor(s parser.InsertQuery) (string, error) {
 		return "", err
 	}
 
-	err = validateInsertQuery(s)
+	err = validator.ValidateInsertQuery(s)
 
 	if err != nil {
 		return "", err

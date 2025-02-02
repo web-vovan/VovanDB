@@ -1,17 +1,19 @@
-package internal
+package executor
 
 import (
 	"strings"
 	"vovanDB/internal/constants"
 	"vovanDB/internal/helpers"
 	"vovanDB/internal/parser"
+	"vovanDB/internal/validator"
+	"vovanDB/internal"
 	schemaHelpers "vovanDB/internal/schema/helpers"
 )
 
 func selectExecutor(s parser.SelectQuery) (string, error) {
 	tableName := s.Table
 
-	err := validateSelectQuery(s)
+	err := validator.ValidateSelectQuery(s)
 
 	if err != nil {
 		return "", err
@@ -28,14 +30,14 @@ func selectExecutor(s parser.SelectQuery) (string, error) {
 	}
 
 	// Индексы неподходящих строк
-	notMatchingRowIndices, err := getNotMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
+	notMatchingRowIndices, err := internal.GetNotMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
 
 	if err != nil {
 		return "", err
 	}
 
 	// Индексы подходящих колонок
-	matchingColumnIndices, err := getMatchingColumnIndices(&tableSchema, s.Columns)
+	matchingColumnIndices, err := internal.GetMatchingColumnIndices(&tableSchema, s.Columns)
 
 	if err != nil {
 		return "", err
