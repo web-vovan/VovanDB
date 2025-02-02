@@ -7,8 +7,8 @@ import (
 	"vovanDB/internal/helpers"
 	"vovanDB/internal/parser"
 	"vovanDB/internal/validator"
-	"vovanDB/internal"
 	schemaHelpers "vovanDB/internal/schema/helpers"
+	executorHelpers "vovanDB/internal/executor/helpers"
 )
 
 func updateExecutor(s parser.UpdateQuery) (string, error) {
@@ -31,7 +31,7 @@ func updateExecutor(s parser.UpdateQuery) (string, error) {
 	}
 
 	// Индексы подходящих строк
-	matchingRowIndices, err := internal.GetMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
+	matchingRowIndices, err := executorHelpers.GetMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
 
 	if err != nil {
 		return "", err

@@ -6,7 +6,7 @@ import (
 	"vovanDB/internal/helpers"
 	"vovanDB/internal/parser"
 	"vovanDB/internal/validator"
-	"vovanDB/internal"
+	executorHelpers "vovanDB/internal/executor/helpers"
 	schemaHelpers "vovanDB/internal/schema/helpers"
 )
 
@@ -30,14 +30,14 @@ func selectExecutor(s parser.SelectQuery) (string, error) {
 	}
 
 	// Индексы неподходящих строк
-	notMatchingRowIndices, err := internal.GetNotMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
+	notMatchingRowIndices, err := executorHelpers.GetNotMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
 
 	if err != nil {
 		return "", err
 	}
 
 	// Индексы подходящих колонок
-	matchingColumnIndices, err := internal.GetMatchingColumnIndices(&tableSchema, s.Columns)
+	matchingColumnIndices, err := executorHelpers.GetMatchingColumnIndices(&tableSchema, s.Columns)
 
 	if err != nil {
 		return "", err
