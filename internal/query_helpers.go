@@ -2,10 +2,11 @@ package internal
 
 import (
 	"vovanDB/internal/schema"
+	"vovanDB/internal/condition"
 )
 
 // Индексы строк, удовлетворяющие фильтру
-func getMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchema, conditions *[]Condition) (map[int]bool, error) {
+func getMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchema, conditions *[]condition.Condition) (map[int]bool, error) {
 	var result = make(map[int]bool)
 
 	mapConditions, err := transformConditionsToMap(tableSchema, conditions)
@@ -32,7 +33,7 @@ func getMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchem
 }
 
 // Индексы строк, неудовлетворяющие фильтру
-func getNotMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchema, conditions *[]Condition) (map[int]bool, error) {
+func getNotMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchema, conditions *[]condition.Condition) (map[int]bool, error) {
 	var result = make(map[int]bool)
 
 	mapConditions, err := transformConditionsToMap(tableSchema, conditions)
@@ -59,8 +60,8 @@ func getNotMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSc
 }
 
 // Преобразование массива с условиями в мапу
-func transformConditionsToMap(tableSchema *schema.TableSchema, conditions *[]Condition) (map[int]Condition, error) {
-	var result = make(map[int]Condition)
+func transformConditionsToMap(tableSchema *schema.TableSchema, conditions *[]condition.Condition) (map[int]condition.Condition, error) {
+	var result = make(map[int]condition.Condition)
 
 	for _, condition := range *conditions {
 		index, err := tableSchema.GetColumnIndex(condition.Column)

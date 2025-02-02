@@ -1,4 +1,4 @@
-package internal
+package condition
 
 import (
 	"fmt"

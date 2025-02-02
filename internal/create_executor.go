@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"vovanDB/internal/helpers"
 	"vovanDB/internal/schema"
+	"vovanDB/internal/parser"
 )
 
-func createExecutor(s CreateQuery) (string, error) {
+func createExecutor(s parser.CreateQuery) (string, error) {
 	tableName := s.Table
 
 	err := validateCreateQuery(s)

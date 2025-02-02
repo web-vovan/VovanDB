@@ -4,10 +4,11 @@ import (
 	"strings"
 	"vovanDB/internal/constants"
 	"vovanDB/internal/helpers"
+	"vovanDB/internal/parser"
 	schemaHelpers "vovanDB/internal/schema/helpers"
 )
 
-func selectExecutor(s SelectQuery) (string, error) {
+func selectExecutor(s parser.SelectQuery) (string, error) {
 	tableName := s.Table
 
 	err := validateSelectQuery(s)

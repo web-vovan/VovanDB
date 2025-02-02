@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"strconv"
 	"vovanDB/internal/helpers"
+	"vovanDB/internal/parser"
 	schemaHelpers "vovanDB/internal/schema/helpers"
 )
 
-func insertExecutor(s InsertQuery) (string, error) {
+func insertExecutor(s parser.InsertQuery) (string, error) {
 	tableName := s.Table
 	schema, err := schemaHelpers.GetSchema(tableName)
 
@@ -65,7 +66,7 @@ func insertExecutor(s InsertQuery) (string, error) {
 }
 
 // Получение строки с данными
-func getInsertRowData(r []InsertValue) []byte {
+func getInsertRowData(r []parser.InsertValue) []byte {
 	var rowBuffer bytes.Buffer
 
 	countValues := len(r)

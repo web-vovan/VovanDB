@@ -1,13 +1,14 @@
-package internal
+package parser
 
 import (
 	"fmt"
+	"vovanDB/internal/condition"
 )
 
 type SelectQuery struct {
 	Table      string
 	Columns    []string
-	Conditions []Condition
+	Conditions []condition.Condition
 }
 
 func (q SelectQuery) String() string {
@@ -25,7 +26,7 @@ func (q SelectQuery) showAllColumns() bool {
 func selectParser(p *Parser) (SQLQuery, error) {
 	var columns []string
 	var table string
-	var conditions []Condition
+	var conditions []condition.Condition
 
 	if p.isSelectQuery() {
 		p.next()

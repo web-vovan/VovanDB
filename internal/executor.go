@@ -1,12 +1,15 @@
 package internal
 
-import "fmt"
+import (
+	"fmt"
+	"vovanDB/internal/parser"
+)
 
 type Executor struct {
-	sqlQuery SQLQuery
+	sqlQuery parser.SQLQuery
 }
 
-func NewExecutor(s SQLQuery) *Executor {
+func NewExecutor(s parser.SQLQuery) *Executor {
 	return &Executor{
 		sqlQuery: s,
 	}
@@ -14,8 +17,8 @@ func NewExecutor(s SQLQuery) *Executor {
 
 func (e *Executor) ExecuteQuery() (string, error) {
 	switch e.sqlQuery.(type) {
-	case CreateQuery:
-		createQuery, ok := e.sqlQuery.(CreateQuery)
+	case parser.CreateQuery:
+		createQuery, ok := e.sqlQuery.(parser.CreateQuery)
 
 		if !ok {
 			return "", fmt.Errorf("ошибка при преобразовании типа CreateQuery")
@@ -28,8 +31,8 @@ func (e *Executor) ExecuteQuery() (string, error) {
 		}
 
 		return data, nil
-	case DropQuery:
-		dropQuery, ok := e.sqlQuery.(DropQuery)
+	case parser.DropQuery:
+		dropQuery, ok := e.sqlQuery.(parser.DropQuery)
 
 		if !ok {
 			return "", fmt.Errorf("ошибка при преобразовании типа DropQuery")
@@ -42,8 +45,8 @@ func (e *Executor) ExecuteQuery() (string, error) {
 		}
 
 		return data, nil
-	case InsertQuery:
-		insertQuery, ok := e.sqlQuery.(InsertQuery)
+	case parser.InsertQuery:
+		insertQuery, ok := e.sqlQuery.(parser.InsertQuery)
 
 		if !ok {
 			return "", fmt.Errorf("ошибка при преобразовании типа InsertQuery")
@@ -56,8 +59,8 @@ func (e *Executor) ExecuteQuery() (string, error) {
 		}
 
 		return data, nil
-	case SelectQuery:
-		selectQuery, ok := e.sqlQuery.(SelectQuery)
+	case parser.SelectQuery:
+		selectQuery, ok := e.sqlQuery.(parser.SelectQuery)
 
 		if !ok {
 			return "", fmt.Errorf("ошибка при преобразовании типа InsertQuery")
@@ -70,8 +73,8 @@ func (e *Executor) ExecuteQuery() (string, error) {
 		}
 
 		return data, err
-	case UpdateQuery:
-		updateQuery, ok := e.sqlQuery.(UpdateQuery)
+	case parser.UpdateQuery:
+		updateQuery, ok := e.sqlQuery.(parser.UpdateQuery)
 
 		if !ok {
 			return "", fmt.Errorf("ошибка при преобразовании типа InsertQuery")

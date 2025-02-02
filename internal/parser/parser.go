@@ -1,8 +1,9 @@
-package internal
+package parser
 
 import (
 	"fmt"
 	"strings"
+	"vovanDB/internal/condition"
 	"vovanDB/internal/constants"
 	"vovanDB/internal/lexer"
 )
@@ -166,8 +167,8 @@ func (p *Parser) isEqualOperator() bool {
     return p.isOperator() && p.current().Value == "="
 }
 
-func (p *Parser) getCondition() (Condition, error) {
-    nilCondition := Condition{}
+func (p *Parser) getCondition() (condition.Condition, error) {
+    nilCondition := condition.Condition{}
 
     if !p.isIdentifier() {
         return nilCondition, fmt.Errorf("неверная структура в условии where, нет идентификатора")
@@ -190,7 +191,7 @@ func (p *Parser) getCondition() (Condition, error) {
 
     p.next()
 
-    return Condition{
+    return condition.Condition{
         Column: column,
         Operator: operator,
         Value: value,
@@ -291,8 +292,8 @@ func (p *Parser) getInsertRow() ([]InsertValue, error) {
     return rowValues, nil
 }
 
-func (p *Parser) getArrayConditions() ([]Condition, error) {
-    var conditions []Condition
+func (p *Parser) getArrayConditions() ([]condition.Condition, error) {
+    var conditions []condition.Condition
 
     // Условия
 	for {

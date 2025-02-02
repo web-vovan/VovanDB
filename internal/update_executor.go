@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"os"
 	"vovanDB/internal/helpers"
+	"vovanDB/internal/parser"
 	schemaHelpers "vovanDB/internal/schema/helpers"
 )
 
-func updateExecutor(s UpdateQuery) (string, error) {
+func updateExecutor(s parser.UpdateQuery) (string, error) {
 	tableName := s.Table
 
 	err := validateUpdateQuery(s)
@@ -40,7 +41,7 @@ func updateExecutor(s UpdateQuery) (string, error) {
 	}
 
 	// Значения для колонок
-	var columnValues = make(map[int]UpdateValue)
+	var columnValues = make(map[int]parser.UpdateValue)
 
 	for _, value := range s.Values {
 		i, err := tableSchema.GetColumnIndex(value.ColumnName)

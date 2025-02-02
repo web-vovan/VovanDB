@@ -6,6 +6,7 @@ import (
 	"time"
 	"fmt"
 	"vovanDB/internal/lexer"
+	"vovanDB/internal/parser"
 	"vovanDB/internal"
 
 	"github.com/joho/godotenv"
@@ -41,7 +42,7 @@ func Execute(sql string) string {
 	}
 
 	// Парсер
-	parser := internal.NewParser(tokens)
+	parser := parser.NewParser(tokens)
 
 	// Подготовленный запрос
 	sqlQuery, err := parser.Parse()

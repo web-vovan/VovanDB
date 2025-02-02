@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"os"
 	"vovanDB/internal/helpers"
+	"vovanDB/internal/parser"
 )
 
-func dropExecutor(s DropQuery) (string, error) {
+func dropExecutor(s parser.DropQuery) (string, error) {
 	tableName := s.Table
 
 	err := validateDropQuery(s)

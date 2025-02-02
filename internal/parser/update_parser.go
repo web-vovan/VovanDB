@@ -1,7 +1,8 @@
-package internal
+package parser
 
 import (
 	"fmt"
+	"vovanDB/internal/condition"
 )
 
 type UpdateValue struct {
@@ -13,7 +14,7 @@ type UpdateValue struct {
 type UpdateQuery struct {
 	Table      string
 	Values     []UpdateValue
-	Conditions []Condition
+	Conditions []condition.Condition
 }
 
 func (q UpdateQuery) QueryType() string {
@@ -23,7 +24,7 @@ func (q UpdateQuery) QueryType() string {
 func updateParser(p *Parser) (SQLQuery, error) {
 	var table string
 	var values []UpdateValue
-	var conditions []Condition
+	var conditions []condition.Condition
 
 	if p.isUpdateQuery() {
 		p.next()
