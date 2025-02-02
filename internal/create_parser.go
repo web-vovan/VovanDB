@@ -2,15 +2,8 @@ package internal
 
 import (
 	"fmt"
+	"vovanDB/internal/constants"
 )
-
-var columnTypes = map[string]int{
-	"INT":  TYPE_DIGIT,
-	"TEXT": TYPE_STRING,
-	"BOOL": TYPE_BOOL,
-	"DATE": TYPE_DATE,
-	"DATETIME": TYPE_DATETIME,
-}
 
 type CreateColumn struct {
 	Name string
@@ -29,7 +22,7 @@ func (q CreateQuery) String() string {
 }
 
 func (c CreateColumn) String() string {
-	return fmt.Sprintf("\nName: %s\nType: %s\nAutoIncrement: %t\nNotNull: %t", c.Name, typeNames[c.Type], c.AutoIncrement, c.NotNull)
+	return fmt.Sprintf("\nName: %s\nType: %s\nAutoIncrement: %t\nNotNull: %t", c.Name, constants.TypeNames[c.Type], c.AutoIncrement, c.NotNull)
 }
 
 func (q CreateQuery) QueryType() string {

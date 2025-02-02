@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"strings"
+	"vovanDB/internal/constants"
 )
 
 type SQLQuery interface {
@@ -97,35 +98,35 @@ func (p *Parser) isUpdateQuery() bool {
 }
 
 func (p *Parser) isIdentifier() bool {
-    return p.current().Type == TYPE_IDENTIFIER
+    return p.current().Type == constants.TYPE_IDENTIFIER
 }
 
 func (p *Parser) isKeyword() bool {
-    return p.current().Type == TYPE_KEYWORD
+    return p.current().Type == constants.TYPE_KEYWORD
 }
 
 func (p *Parser) isOperator() bool {
-    return p.current().Type == TYPE_OPERATOR
+    return p.current().Type == constants.TYPE_OPERATOR
 }
 
 func (p *Parser) isSymbol() bool {
-    return p.current().Type == TYPE_SYMBOL
+    return p.current().Type == constants.TYPE_SYMBOL
 }
 
 func (p *Parser) isString() bool {
-    return p.current().Type == TYPE_STRING
+    return p.current().Type == constants.TYPE_STRING
 }
 
 func (p *Parser) isDigit() bool {
-    return p.current().Type == TYPE_DIGIT
+    return p.current().Type == constants.TYPE_DIGIT
 }
 
 func (p *Parser) isBool() bool {
-    return p.current().Type == TYPE_BOOL
+    return p.current().Type == constants.TYPE_BOOL
 }
 
 func (p *Parser) isNull() bool {
-    return p.current().Type == TYPE_NULL
+    return p.current().Type == constants.TYPE_NULL
 }
 
 func (p *Parser) isComma() bool {
@@ -211,7 +212,7 @@ func (p *Parser) getCreateColumn() (CreateColumn, error) {
     
     typeText := strings.ToUpper(p.next().Value)
 
-    columnType := columnTypes[typeText]
+    columnType := constants.ColumnTypes[typeText]
 
     if columnType == 0 {
         return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок3")

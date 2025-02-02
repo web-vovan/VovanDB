@@ -2,6 +2,7 @@ package internal
 
 import (
 	"strings"
+	"vovanDB/internal/constants"
 )
 
 func selectExecutor(s SelectQuery) (string, error) {
@@ -60,8 +61,8 @@ func selectExecutor(s SelectQuery) (string, error) {
 
 			schemaColumn := (*tableSchema.Columns)[j]
 
-			if schemaColumn.Type == TYPE_DIGIT ||
-				schemaColumn.Type == TYPE_BOOL ||
+			if schemaColumn.Type == constants.TYPE_DIGIT ||
+				schemaColumn.Type == constants.TYPE_BOOL ||
 				(!schemaColumn.NotNull && data == "NULL") {
 				builder.WriteString("\"" + (*tableSchema.Columns)[j].Name + "\"" + ":" + data)
 			} else {

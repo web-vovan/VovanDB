@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"vovanDB/internal/constants"
 )
 
 type Table struct {
@@ -31,7 +32,7 @@ func (s TableSchema) String() string {
 	result += "Columns: \n"
 
 	for _, c := range *s.Columns {
-		result += c.Name + " : " + typeNames[c.Type] + "\n"
+		result += c.Name + " : " + constants.TypeNames[c.Type] + "\n"
 	}
 
 	result += "AutoIncrements: \n"

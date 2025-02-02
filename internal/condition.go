@@ -1,6 +1,9 @@
 package internal
 
-import "fmt"
+import (
+	"fmt"
+	"vovanDB/internal/constants"
+)
 
 // Условие
 type Condition struct {
@@ -11,5 +14,5 @@ type Condition struct {
 }
 
 func (c Condition) String() string {
-	return fmt.Sprintf("\nColumn: %s\nOperator: %s\nValue: %s\nValueType: %s\n===", c.Column, c.Operator, c.Value, typeNames[c.ValueType])
+	return fmt.Sprintf("\nColumn: %s\nOperator: %s\nValue: %s\nValueType: %s\n===", c.Column, c.Operator, c.Value, constants.TypeNames[c.ValueType])
 }

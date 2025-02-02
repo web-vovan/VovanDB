@@ -4,83 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
+	"vovanDB/internal/constants"
 )
-
-// Типы токенов
-const (
-	TYPE_UNDEFINED = iota
-	TYPE_KEYWORD
-	TYPE_IDENTIFIER
-	TYPE_DIGIT
-	TYPE_STRING
-	TYPE_BOOL
-	TYPE_DATE
-	TYPE_DATETIME
-	TYPE_OPERATOR
-	TYPE_SYMBOL
-	TYPE_NULL
-)
-
-var typeNames = map[int]string{
-	TYPE_UNDEFINED:  "TYPE_UNDEFINED",
-	TYPE_KEYWORD:    "TYPE_KEYWORD",
-	TYPE_IDENTIFIER: "TYPE_IDENTIFIER",
-	TYPE_DIGIT:      "TYPE_DIGIT",
-	TYPE_STRING:     "TYPE_STRING",
-	TYPE_BOOL:       "TYPE_BOOL",
-	TYPE_DATE:       "TYPE_DATE",
-	TYPE_DATETIME:   "TYPE_DATETIME",
-	TYPE_OPERATOR:   "TYPE_OPERATOR",
-	TYPE_SYMBOL:     "TYPE_SYMBOL",
-	TYPE_NULL:       "TYPE_NULL",
-}
-
-// Ключевые слова
-var keywords = map[string]bool{
-	"SELECT":         true,
-	"FROM":           true,
-	"WHERE":          true,
-	"AND":            true,
-	"CREATE":         true,
-	"TABLE":          true,
-	"DROP":           true,
-	"INSERT":         true,
-	"INTO":           true,
-	"VALUES":         true,
-	"UPDATE":         true,
-	"SET":            true,
-	"AUTO_INCREMENT": true,
-	"NOT":            true,
-}
-
-// Булевы выражения
-var bools = map[string]bool{
-	"TRUE":  true,
-	"FALSE": true,
-}
-
-// Операторы
-var operators = map[string]bool{
-	"=":  true,
-	">":  true,
-	"<":  true,
-	">=": true,
-	"<=": true,
-}
-
-// Символы
-var symbols = map[string]bool{
-	"*": true,
-	",": true,
-	"(": true,
-	")": true,
-	";": true,
-}
-
-// NULL
-var null = map[string]bool{
-	"NULL": true,
-}
 
 type Lexer struct {
 	Input    string // запрос для лексического анализа
@@ -171,12 +96,12 @@ func (l *Lexer) isDigit() bool {
 
 // Проверка текущего символа на оператор
 func (l *Lexer) isOperator() bool {
-	return operators[string(l.current())]
+	return constants.Operators[string(l.current())]
 }
 
 // Проверка текущего символа на символ
 func (l *Lexer) isSymbol() bool {
-	return symbols[string(l.current())]
+	return constants.Symbols[string(l.current())]
 }
 
 // Проверка текущего символа на одинарную кавычку (в них строковые литералы)
@@ -201,17 +126,17 @@ func (l *Lexer) getStringToken() Token {
 
 	var tokenType int
 
-	if keywords[strings.ToUpper(result)] {
-		tokenType = TYPE_KEYWORD
+	if constants.Keywords[strings.ToUpper(result)] {
+		tokenType = constants.TYPE_KEYWORD
 		result = strings.ToUpper(result)
-	} else if bools[strings.ToUpper(result)] {
-		tokenType = TYPE_BOOL
+	} else if constants.Bools[strings.ToUpper(result)] {
+		tokenType = constants.TYPE_BOOL
 		result = strings.ToUpper(result)
-	} else if null[strings.ToUpper(result)] {
-		tokenType = TYPE_NULL
+	} else if constants.Null[strings.ToUpper(result)] {
+		tokenType = constants.TYPE_NULL
 		result = strings.ToUpper(result)
 	} else {
-		tokenType = TYPE_IDENTIFIER
+		tokenType = constants.TYPE_IDENTIFIER
 	}
 
 	return Token{
@@ -250,20 +175,20 @@ func (l *Lexer) getStringLiteralToken() (Token, error) {
 
 	if isValidDate(builder.String()) {
 		return Token{
-			Type:  TYPE_DATE,
+			Type:  constants.TYPE_DATE,
 			Value: builder.String(),
 		}, nil
 	}
 
 	if isValidDatetime(builder.String()) {
 		return Token{
-			Type:  TYPE_DATETIME,
+			Type:  constants.TYPE_DATETIME,
 			Value: builder.String(),
 		}, nil
 	}
 
 	return Token{
-		Type:  TYPE_STRING,
+		Type:  constants.TYPE_STRING,
 		Value: builder.String(),
 	}, nil
 }
@@ -277,7 +202,7 @@ func (l *Lexer) getDigitToken() Token {
 	}
 
 	return Token{
-		Type:  TYPE_DIGIT,
+		Type:  constants.TYPE_DIGIT,
 		Value: builder.String(),
 	}
 }
@@ -291,7 +216,7 @@ func (l *Lexer) getOperatorToken() Token {
 	}
 
 	return Token{
-		Type:  TYPE_OPERATOR,
+		Type:  constants.TYPE_OPERATOR,
 		Value: builder.String(),
 	}
 }
@@ -299,7 +224,7 @@ func (l *Lexer) getOperatorToken() Token {
 // Получение токена символа
 func (l *Lexer) getSymbolToken() Token {
 	return Token{
-		Type:  TYPE_SYMBOL,
+		Type:  constants.TYPE_SYMBOL,
 		Value: string(l.next()),
 	}
 }

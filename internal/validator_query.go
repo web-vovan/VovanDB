@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"strconv"
+	"vovanDB/internal/constants"
 )
 
 func validateSelectQuery(s SelectQuery) error {
@@ -101,8 +102,8 @@ func validateCreateQuery(s CreateQuery) error {
 
 	// Проверка типа колонки с auto_increment
 	for _, column := range s.Columns {
-		if column.AutoIncrement && column.Type != TYPE_DIGIT {
-			return fmt.Errorf("колонка %s с типом %s не может иметь атрибут auto_increment", column.Name, typeNames[column.Type])
+		if column.AutoIncrement && column.Type != constants.TYPE_DIGIT {
+			return fmt.Errorf("колонка %s с типом %s не может иметь атрибут auto_increment", column.Name, constants.TypeNames[column.Type])
 		}
 	}
 
@@ -176,11 +177,11 @@ func validateInsertQuery(s InsertQuery) error {
 		for j, value := range rowValues {
 			schemaColumn := (*schema.Columns)[mapColumns[j]]
 
-			if !schemaColumn.NotNull && value.Type == TYPE_NULL {
+			if !schemaColumn.NotNull && value.Type == constants.TYPE_NULL {
 				continue
 			}
 
-			if schemaColumn.NotNull && value.Type == TYPE_NULL {
+			if schemaColumn.NotNull && value.Type == constants.TYPE_NULL {
 				return fmt.Errorf("запрос невалиден, в строке %d не может быть принят null ", i+1)
 			}
 
@@ -264,11 +265,11 @@ func validateConditions(schema TableSchema, conditions []Condition) error {
 			return err
 		}
 
-		if !schemaColumn.NotNull && c.ValueType == TYPE_NULL {
+		if !schemaColumn.NotNull && c.ValueType == constants.TYPE_NULL {
 			continue
 		}
 
-		if schemaColumn.NotNull && c.ValueType == TYPE_NULL {
+		if schemaColumn.NotNull && c.ValueType == constants.TYPE_NULL {
 			return fmt.Errorf("для колонки %s в условии where не может быть установлен null", c.Column)
 		}
 
