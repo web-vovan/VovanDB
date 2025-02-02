@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"vovanDB/internal/helpers"
+	schemaHelpers "vovanDB/internal/schema/helpers"
 )
 
 func updateExecutor(s UpdateQuery) (string, error) {
@@ -16,10 +18,10 @@ func updateExecutor(s UpdateQuery) (string, error) {
 	}
 
 	// Загружаем схему
-	tableSchema, _ := getSchema(tableName)
+	tableSchema, _ := schemaHelpers.GetSchema(tableName)
 
 	// Загружаем данные таблицы
-	tableData, err := getTableData(tableName)
+	tableData, err := helpers.GetTableData(tableName)
 
 	if err != nil {
 		return "", err
@@ -41,7 +43,7 @@ func updateExecutor(s UpdateQuery) (string, error) {
 	var columnValues = make(map[int]UpdateValue)
 
 	for _, value := range s.Values {
-		i, err := tableSchema.getColumnIndex(value.ColumnName)
+		i, err := tableSchema.GetColumnIndex(value.ColumnName)
 
 		if err != nil {
 			return "", err
@@ -70,7 +72,7 @@ func updateExecutor(s UpdateQuery) (string, error) {
 		updateData.Write(getUpdateRowData(row))
 	}
 
-	file, err := os.Create(getPathTableData(tableName))
+	file, err := os.Create(helpers.GetPathTableData(tableName))
 
 	if err != nil {
 		return "", err

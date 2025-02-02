@@ -1,4 +1,4 @@
-package internal
+package schema
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"vovanDB/internal/constants"
+	"vovanDB/internal/helpers"
 )
 
 type Table struct {
@@ -45,7 +46,7 @@ func (s TableSchema) String() string {
 }
 
 // Проверка наличия колонки в схеме
-func (s *TableSchema) hasColumnInSchema(columnName string) bool {
+func (s *TableSchema) HasColumnInSchema(columnName string) bool {
 	for _, c := range *s.Columns {
 		if c.Name == columnName {
 			return true
@@ -56,7 +57,7 @@ func (s *TableSchema) hasColumnInSchema(columnName string) bool {
 }
 
 // Колонка
-func (s *TableSchema) getColumn(columnName string) (ColumnSchema, error) {
+func (s *TableSchema) GetColumn(columnName string) (ColumnSchema, error) {
 	for _, c := range *s.Columns {
 		if c.Name == columnName {
 			return c, nil
@@ -68,7 +69,7 @@ func (s *TableSchema) getColumn(columnName string) (ColumnSchema, error) {
 
 
 // Тип колонки
-func (s *TableSchema) getColumnType(columnName string) (int, error) {
+func (s *TableSchema) GetColumnType(columnName string) (int, error) {
 	for _, c := range *s.Columns {
 		if c.Name == columnName {
 			return c.Type, nil
@@ -79,7 +80,7 @@ func (s *TableSchema) getColumnType(columnName string) (int, error) {
 }
 
 // Индекс колонки
-func (s *TableSchema) getColumnIndex(columnName string) (int, error) {
+func (s *TableSchema) GetColumnIndex(columnName string) (int, error) {
 	for i, c := range *s.Columns {
 		if c.Name == columnName {
 			return i, nil
@@ -89,14 +90,14 @@ func (s *TableSchema) getColumnIndex(columnName string) (int, error) {
 	return -1, fmt.Errorf("колонки %s нет в схеме таблицы %s", columnName, s.TableName)
 }
 
-func (s *TableSchema) writeToFile() error {
+func (s *TableSchema) WriteToFile() error {
 	schemaData, err := json.MarshalIndent(s, "", "  ")
 
 	if err != nil {
 		return fmt.Errorf("ошибка при сериализации файла схемы в таблице %s: %w", s.TableName, err)
 	}
 
-	err = os.WriteFile(getPathTableSchema(s.TableName), schemaData, 0644)
+	err = os.WriteFile(helpers.GetPathTableSchema(s.TableName), schemaData, 0644)
 
 	if err != nil {
 		return fmt.Errorf("не удалось записать данные в файл схемы для таблицы: %s", s.TableName)
@@ -105,11 +106,11 @@ func (s *TableSchema) writeToFile() error {
 	return nil
 }
 
-func (s *TableSchema) hasAutoIncrementColumn() bool {
+func (s *TableSchema) HasAutoIncrementColumn() bool {
 	return len(s.AutoIncrements) > 0
 }
 
-func (s *TableSchema) getAutoIncrementColumnName() string {
+func (s *TableSchema) GetAutoIncrementColumnName() string {
 	for _, c := range *s.Columns {
 		if c.AutoIncrement {
 			return c.Name
@@ -119,7 +120,7 @@ func (s *TableSchema) getAutoIncrementColumnName() string {
 	return ""
 }
 
-func (s *TableSchema) getAutoIncrementColumnIndex() int {
+func (s *TableSchema) GetAutoIncrementColumnIndex() int {
 	for i, c := range *s.Columns {
 		if c.AutoIncrement {
 			return i
@@ -129,8 +130,8 @@ func (s *TableSchema) getAutoIncrementColumnIndex() int {
 	return -1
 }
 
-func (s *TableSchema) getAutoIncrementColumnValue() int {
-	column := s.getAutoIncrementColumnName()
+func (s *TableSchema) GetAutoIncrementColumnValue() int {
+	column := s.GetAutoIncrementColumnName()
 
 	if column == "" {
 		return -1
@@ -145,6 +146,6 @@ func (s *TableSchema) getAutoIncrementColumnValue() int {
 	return r
 }
 
-func (s *TableSchema) incrementColumn(column string) {
+func (s *TableSchema) IncrementColumn(column string) {
 	s.AutoIncrements[column]++
 }

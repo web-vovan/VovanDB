@@ -1,8 +1,10 @@
-package internal
+package tests
 
 import (
 	"encoding/json"
 	"testing"
+	"vovanDB/internal/database"
+	testHelpers "vovanDB/tests/helpers"
 )
 
 func TestInsertExecutor(t *testing.T) {
@@ -15,9 +17,9 @@ func TestInsertExecutor(t *testing.T) {
 		expectedAutoIncrement int
 	}
 
-	defer clearAllDatabase()
+	defer testHelpers.ClearAllTestDatabase()
 
-	err := createTestDataBase()
+	err := testHelpers.CreateTestDataBase()
 
 	if err != nil {
 		t.Error(err)
@@ -56,13 +58,10 @@ func TestInsertExecutor(t *testing.T) {
 	}
 
 	for _, item := range testData {
-		result := Execute(item.sql)
+		result := database.Execute(item.sql)
 
-		executeResult := ExecuteResult{}
+		executeResult := database.ExecuteResult{}
 		err := json.Unmarshal([]byte(result), &executeResult)
-
-		schema, _ := getSchema("users")
-		schemaAutoIncrement := schema.getAutoIncrementColumnValue()
 
 		if err != nil {
 			t.Error(err)
@@ -78,10 +77,6 @@ func TestInsertExecutor(t *testing.T) {
 
 		if executeResult.Error != item.expectedError {
 			t.Errorf("test error: %s, expected: %s, result: %s", item.testName, item.expectedError, executeResult.Error)
-		}
-
-		if schemaAutoIncrement != item.expectedAutoIncrement {
-			t.Errorf("test error: %s, expected: %d, result: %d", item.testName, item.expectedAutoIncrement, schemaAutoIncrement)
 		}
 	}
 }

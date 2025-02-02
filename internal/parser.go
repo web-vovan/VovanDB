@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"vovanDB/internal/constants"
+	"vovanDB/internal/lexer"
 )
 
 type SQLQuery interface {
@@ -12,13 +13,13 @@ type SQLQuery interface {
 
 // Парсер
 type Parser struct {
-	Tokens []Token
-	CurrentToken Token
+	Tokens []lexer.Token
+	CurrentToken lexer.Token
 	Position int
 }
 
 // Новый парсер
-func NewParser(tokens []Token) *Parser {
+func NewParser(tokens []lexer.Token) *Parser {
 	return &Parser{
 		Tokens: tokens,
 		CurrentToken: tokens[0],
@@ -27,7 +28,7 @@ func NewParser(tokens []Token) *Parser {
 }
 
 // Парсинг токенов
-func (p *Parser) parse() (SQLQuery, error) {
+func (p *Parser) Parse() (SQLQuery, error) {
     var sqlQuery SQLQuery
     var err error
 
@@ -53,18 +54,18 @@ func (p *Parser) parse() (SQLQuery, error) {
 }
 
 // Получение текущего токена
-func (p *Parser) current() Token {
+func (p *Parser) current() lexer.Token {
 	return p.CurrentToken
 }
 
 // Получение текущего токена и переход к следующему
-func (p *Parser) next() Token {
+func (p *Parser) next() lexer.Token {
 	currentToken := p.current()
 
 	p.Position++
 
 	if p.Position >= len(p.Tokens) {
-		p.CurrentToken = Token{}
+		p.CurrentToken = lexer.Token{}
 	} else {
 		p.CurrentToken = p.Tokens[p.Position]	
 	}

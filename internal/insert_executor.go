@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"vovanDB/internal/helpers"
+	schemaHelpers "vovanDB/internal/schema/helpers"
 )
 
 func insertExecutor(s InsertQuery) (string, error) {
 	tableName := s.Table
-	schema, err := getSchema(tableName)
+	schema, err := schemaHelpers.GetSchema(tableName)
 
 	if err != nil {
 		return "", err
@@ -22,19 +24,19 @@ func insertExecutor(s InsertQuery) (string, error) {
 
 	var insertData bytes.Buffer
 
-	hasAutoIncrementColumn := schema.hasAutoIncrementColumn()
+	hasAutoIncrementColumn := schema.HasAutoIncrementColumn()
 	addAutoIncrementData := false
-	autoIncrementColumnName := schema.getAutoIncrementColumnName()
+	autoIncrementColumnName := schema.GetAutoIncrementColumnName()
 
 	if hasAutoIncrementColumn {
-		if !hasStringInSlice(autoIncrementColumnName, s.Columns) {
+		if !helpers.HasStringInSlice(autoIncrementColumnName, s.Columns) {
 			addAutoIncrementData = true
 		}
 	}
 
 	for _, r := range s.Values {
 		if addAutoIncrementData {
-			schema.incrementColumn(autoIncrementColumnName)
+			schema.IncrementColumn(autoIncrementColumnName)
 			insertData.WriteString(strconv.Itoa(schema.AutoIncrements[autoIncrementColumnName]) + ";")
 		}
 
@@ -47,13 +49,13 @@ func insertExecutor(s InsertQuery) (string, error) {
 		schema.AutoIncrements[autoIncrementColumnName] = newAutoIncrement
 	}
 
-	err = writeDataInTable(insertData.Bytes(), tableName)
+	err = helpers.WriteDataInTable(insertData.Bytes(), tableName)
 
 	if err != nil {
 		return "", err
 	}
 
-	err = schema.writeToFile()
+	err = schema.WriteToFile()
 
 	if err != nil {
 		return "", err

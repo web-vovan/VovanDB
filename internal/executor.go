@@ -12,7 +12,7 @@ func NewExecutor(s SQLQuery) *Executor {
 	}
 }
 
-func (e *Executor) executeQuery() (string, error) {
+func (e *Executor) ExecuteQuery() (string, error) {
 	switch e.sqlQuery.(type) {
 	case CreateQuery:
 		createQuery, ok := e.sqlQuery.(CreateQuery)

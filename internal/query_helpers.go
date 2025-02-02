@@ -1,7 +1,11 @@
 package internal
 
+import (
+	"vovanDB/internal/schema"
+)
+
 // Индексы строк, удовлетворяющие фильтру
-func getMatchingRowIndices(tableData *[][]string, tableSchema *TableSchema, conditions *[]Condition) (map[int]bool, error) {
+func getMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchema, conditions *[]Condition) (map[int]bool, error) {
 	var result = make(map[int]bool)
 
 	mapConditions, err := transformConditionsToMap(tableSchema, conditions)
@@ -28,7 +32,7 @@ func getMatchingRowIndices(tableData *[][]string, tableSchema *TableSchema, cond
 }
 
 // Индексы строк, неудовлетворяющие фильтру
-func getNotMatchingRowIndices(tableData *[][]string, tableSchema *TableSchema, conditions *[]Condition) (map[int]bool, error) {
+func getNotMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchema, conditions *[]Condition) (map[int]bool, error) {
 	var result = make(map[int]bool)
 
 	mapConditions, err := transformConditionsToMap(tableSchema, conditions)
@@ -55,11 +59,11 @@ func getNotMatchingRowIndices(tableData *[][]string, tableSchema *TableSchema, c
 }
 
 // Преобразование массива с условиями в мапу
-func transformConditionsToMap(tableSchema *TableSchema, conditions *[]Condition) (map[int]Condition, error) {
+func transformConditionsToMap(tableSchema *schema.TableSchema, conditions *[]Condition) (map[int]Condition, error) {
 	var result = make(map[int]Condition)
 
 	for _, condition := range *conditions {
-		index, err := tableSchema.getColumnIndex(condition.Column)
+		index, err := tableSchema.GetColumnIndex(condition.Column)
 
 		if err != nil {
 			return result, err
@@ -72,7 +76,7 @@ func transformConditionsToMap(tableSchema *TableSchema, conditions *[]Condition)
 }
 
 // Индексы колонок из схемы, удовлетворяющие списку
-func getMatchingColumnIndices(tableSchema *TableSchema, columns []string) (map[int]bool, error) {
+func getMatchingColumnIndices(tableSchema *schema.TableSchema, columns []string) (map[int]bool, error) {
 	var result = make(map[int]bool)
 
 	if columns[0] == "*" {
@@ -81,7 +85,7 @@ func getMatchingColumnIndices(tableSchema *TableSchema, columns []string) (map[i
 		}
 	} else {
 		for _, column := range columns {
-			index, err := tableSchema.getColumnIndex(column)
+			index, err := tableSchema.GetColumnIndex(column)
 
 			if err != nil {
 				return result, err

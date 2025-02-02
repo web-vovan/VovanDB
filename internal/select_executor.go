@@ -3,6 +3,8 @@ package internal
 import (
 	"strings"
 	"vovanDB/internal/constants"
+	"vovanDB/internal/helpers"
+	schemaHelpers "vovanDB/internal/schema/helpers"
 )
 
 func selectExecutor(s SelectQuery) (string, error) {
@@ -15,10 +17,10 @@ func selectExecutor(s SelectQuery) (string, error) {
 	}
 
 	// Загружаем схему
-	tableSchema, _ := getSchema(tableName)
+	tableSchema, _ := schemaHelpers.GetSchema(tableName)
 
 	// Загружаем данные таблицы
-	tableData, err := getTableData(tableName)
+	tableData, err := helpers.GetTableData(tableName)
 
 	if err != nil {
 		return "", err

@@ -2,6 +2,8 @@ package internal
 
 import (
 	"fmt"
+	"vovanDB/internal/helpers"
+	"vovanDB/internal/schema"
 )
 
 func createExecutor(s CreateQuery) (string, error) {
@@ -14,17 +16,17 @@ func createExecutor(s CreateQuery) (string, error) {
 	}
 
 	// Создаем файлы таблицы
-	err = createTableFiles(tableName)
+	err = helpers.CreateTableFiles(tableName)
 
 	if err != nil {
 		return "", fmt.Errorf("не удалось создать файлы для таблицы: %s", tableName)
 	}
 
 	// Пишем мета-данные в файл схемы
-	var columns []ColumnSchema
+	var columns []schema.ColumnSchema
 
 	for _, column := range s.Columns {
-		columns = append(columns, ColumnSchema{
+		columns = append(columns, schema.ColumnSchema{
 			Name:          column.Name,
 			Type:          column.Type,
 			AutoIncrement: column.AutoIncrement,
@@ -41,13 +43,13 @@ func createExecutor(s CreateQuery) (string, error) {
 		}
 	}
 
-	schema := TableSchema{
+	schema := schema.TableSchema{
 		TableName:      tableName,
 		Columns:        &columns,
 		AutoIncrements: autoIncrementValues,
 	}
 
-	err = schema.writeToFile()
+	err = schema.WriteToFile()
 
 	if err != nil {
 		return "", err

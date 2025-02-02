@@ -1,9 +1,12 @@
-package internal
+package database
 
 import (
 	"encoding/json"
 	"runtime"
 	"time"
+	"fmt"
+	"vovanDB/internal/lexer"
+	"vovanDB/internal"
 
 	"github.com/joho/godotenv"
 )
@@ -23,7 +26,7 @@ func Execute(sql string) string {
 	godotenv.Load(".env")
 
 	// Лексический анализатор
-	lexer := NewLexer(sql)
+	lexer := lexer.NewLexer(sql)
 
 	// Токены лексического анализа
 	tokens, err := lexer.Analyze()
@@ -38,10 +41,10 @@ func Execute(sql string) string {
 	}
 
 	// Парсер
-	parser := NewParser(tokens)
+	parser := internal.NewParser(tokens)
 
 	// Подготовленный запрос
-	sqlQuery, err := parser.parse()
+	sqlQuery, err := parser.Parse()
 
 	if err != nil {
 		result, _ := json.Marshal(
@@ -53,10 +56,10 @@ func Execute(sql string) string {
 	}
 
 	// Executor
-	executor := NewExecutor(sqlQuery)
+	executor := internal.NewExecutor(sqlQuery)
 
 	// Выполняем запрос
-	data, err := executor.executeQuery()
+	data, err := executor.ExecuteQuery()
 
 	if err != nil {
 		result, _ := json.Marshal(
@@ -93,4 +96,18 @@ func ErrorArgs() string {
         })
 
     return string(result)
+}
+
+func humanReadableBytes(bytes uint64) string {
+	const uint = 1024
+
+	if bytes < uint {
+		return fmt.Sprintf("%d B", bytes)
+	}
+
+	if bytes < uint*uint {
+		return fmt.Sprintf("%d KB", bytes/uint)
+	}
+
+	return fmt.Sprintf("%d MB", bytes/(uint*uint))
 }

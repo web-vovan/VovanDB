@@ -4,18 +4,21 @@ import (
 	"fmt"
 	"strconv"
 	"vovanDB/internal/constants"
+	"vovanDB/internal/helpers"
+	"vovanDB/internal/schema"
+	schemaHelpers "vovanDB/internal/schema/helpers"
 )
 
 func validateSelectQuery(s SelectQuery) error {
 	tableName := s.Table
 
 	// Существование таблицы
-	if !fileExists(getPathTableSchema(tableName)) || !fileExists(getPathTableData(tableName)) {
+	if !helpers.FileExists(helpers.GetPathTableSchema(tableName)) || !helpers.FileExists(helpers.GetPathTableData(tableName)) {
 		return fmt.Errorf("невозможно выполнить запрос, таблица %s не существует", tableName)
 	}
 
 	// Загружаем схему
-	schema, err := getSchema(tableName)
+	schema, err := schemaHelpers.GetSchema(tableName)
 
 	if err != nil {
 		return err
@@ -24,7 +27,7 @@ func validateSelectQuery(s SelectQuery) error {
 	// Сравниваем названия колонок в select
 	if !(len(s.Columns) == 1 && s.Columns[0] == "*") {
 		for _, column := range s.Columns {
-			if !schema.hasColumnInSchema(column) {
+			if !schema.HasColumnInSchema(column) {
 				return fmt.Errorf("запрос невалиден, в таблице %s нет колонки %s", tableName, column)
 			}
 		}
@@ -43,12 +46,12 @@ func validateUpdateQuery(s UpdateQuery) error {
 	tableName := s.Table
 
 	// Существование таблицы
-	if !fileExists(getPathTableSchema(tableName)) || !fileExists(getPathTableData(tableName)) {
+	if !helpers.FileExists(helpers.GetPathTableSchema(tableName)) || !helpers.FileExists(helpers.GetPathTableData(tableName)) {
 		return fmt.Errorf("невозможно выполнить запрос, таблица %s не существует", tableName)
 	}
 
 	// Загружаем схему
-	schema, err := getSchema(tableName)
+	schema, err := schemaHelpers.GetSchema(tableName)
 
 	if err != nil {
 		return err
@@ -56,14 +59,14 @@ func validateUpdateQuery(s UpdateQuery) error {
 
 	// Сравниваем названия колонок в update
 	for _, value := range s.Values {
-		if !schema.hasColumnInSchema(value.ColumnName) {
+		if !schema.HasColumnInSchema(value.ColumnName) {
 			return fmt.Errorf("запрос невалиден, в таблице %s нет колонки %s", tableName, value.ColumnName)
 		}
 	}
 
 	// Сравниваем типы колонок в update
 	for _, value := range s.Values {
-		columnType, err := schema.getColumnType(value.ColumnName)
+		columnType, err := schema.GetColumnType(value.ColumnName)
 
 		if err != nil {
 			return err
@@ -85,7 +88,7 @@ func validateUpdateQuery(s UpdateQuery) error {
 
 func validateCreateQuery(s CreateQuery) error {
 	// Существование таблицы
-	if fileExists(getPathTableSchema(s.Table)) || fileExists(getPathTableData(s.Table)) {
+	if helpers.FileExists(helpers.GetPathTableSchema(s.Table)) || helpers.FileExists(helpers.GetPathTableData(s.Table)) {
 		return fmt.Errorf("невозможно создать таблицу %s, она уже существует", s.Table)
 	}
 
@@ -112,7 +115,7 @@ func validateCreateQuery(s CreateQuery) error {
 
 func validateDropQuery(s DropQuery) error {
 	// Существование файлов таблицы
-	if !fileExists(getPathTableSchema(s.Table)) || !fileExists(getPathTableData(s.Table)) {
+	if !helpers.FileExists(helpers.GetPathTableSchema(s.Table)) || !helpers.FileExists(helpers.GetPathTableData(s.Table)) {
 		return fmt.Errorf("невозможно удалить таблицу %s, она не существует", s.Table)
 	}
 
@@ -123,12 +126,12 @@ func validateInsertQuery(s InsertQuery) error {
 	tableName := s.Table
 
 	// Существование таблицы
-	if !fileExists(getPathTableSchema(tableName)) || !fileExists(getPathTableData(tableName)) {
+	if !helpers.FileExists(helpers.GetPathTableSchema(tableName)) || !helpers.FileExists(helpers.GetPathTableData(tableName)) {
 		return fmt.Errorf("невозможно выполнить запрос, таблица %s не существует", tableName)
 	}
 
 	// Загружаем схему
-	schema, err := getSchema(tableName)
+	schema, err := schemaHelpers.GetSchema(tableName)
 
 	if err != nil {
 		return err
@@ -140,14 +143,14 @@ func validateInsertQuery(s InsertQuery) error {
 			continue
 		}
 
-		if !hasStringInSlice(c.Name, s.Columns) {
+		if !helpers.HasStringInSlice(c.Name, s.Columns) {
 			return fmt.Errorf("запрос невалиден, в запросе нет обязательной колонки %s", c.Name)
 		}
 	}
 
 	// Сравниваем названия колонок
 	for _, c := range s.Columns {
-		if !schema.hasColumnInSchema(c) {
+		if !schema.HasColumnInSchema(c) {
 			return fmt.Errorf("запрос невалиден, в таблице %s нет колонки %s", tableName, c)
 		}
 	}
@@ -163,7 +166,7 @@ func validateInsertQuery(s InsertQuery) error {
 	mapColumns := make(map[int]int)
 
 	for i, column := range s.Columns {
-		schemaIndex, err := schema.getColumnIndex(column)
+		schemaIndex, err := schema.GetColumnIndex(column)
 
 		if err != nil {
 			return err
@@ -201,9 +204,9 @@ func validateInsertQuery(s InsertQuery) error {
 	return nil
 }
 
-func validateAutoIncrementInsertQuery(schema *TableSchema, s *InsertQuery, mapColumns map[int]int) error {
+func validateAutoIncrementInsertQuery(schema *schema.TableSchema, s *InsertQuery, mapColumns map[int]int) error {
 	// Индекс колонки auto_increment в схеме
-	autoIncrementSchemaIndex := schema.getAutoIncrementColumnIndex()
+	autoIncrementSchemaIndex := schema.GetAutoIncrementColumnIndex()
 
 	if autoIncrementSchemaIndex == -1 {
 		return nil
@@ -223,7 +226,7 @@ func validateAutoIncrementInsertQuery(schema *TableSchema, s *InsertQuery, mapCo
 	}
 
 	// Текущее значение колонки auto_increment в схеме
-	currentAutoIncrementValue := schema.getAutoIncrementColumnValue()
+	currentAutoIncrementValue := schema.GetAutoIncrementColumnValue()
 
 	if currentAutoIncrementValue == -1 {
 		return fmt.Errorf("не удалось получить текущее значение auto_increment для колонки")
@@ -249,17 +252,17 @@ func validateAutoIncrementInsertQuery(schema *TableSchema, s *InsertQuery, mapCo
 	return nil
 }
 
-func validateConditions(schema TableSchema, conditions []Condition) error {
+func validateConditions(schema schema.TableSchema, conditions []Condition) error {
 	// Сравниваем названия колонок в where
 	for _, c := range conditions {
-		if !schema.hasColumnInSchema(c.Column) {
+		if !schema.HasColumnInSchema(c.Column) {
 			return fmt.Errorf("запрос невалиден, в таблице %s нет колонки %s", schema.TableName, c.Column)
 		}
 	}
 
 	// Сравниваем типы в where
 	for _, c := range conditions {
-		schemaColumn, err := schema.getColumn(c.Column)
+		schemaColumn, err := schema.GetColumn(c.Column)
 
 		if err != nil {
 			return err

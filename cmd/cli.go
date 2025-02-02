@@ -3,16 +3,16 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"vovanDB/internal"
+	"vovanDB/internal/database"
 )
 
 func Run() {
     if len(os.Args) != 2 {
-		fmt.Println(internal.ErrorArgs())
+		fmt.Println(database.ErrorArgs())
 		return
 	}
 
 	sql := os.Args[1]
 
-	fmt.Println(internal.Execute(sql))
+	fmt.Println(database.Execute(sql))
 }

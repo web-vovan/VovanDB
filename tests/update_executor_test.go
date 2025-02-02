@@ -1,11 +1,13 @@
-package internal
+package tests
 
 import (
 	"encoding/json"
 	"testing"
+	testHelpers "vovanDB/tests/helpers"
+	"vovanDB/internal/database"
 )
 
-func TestCreateExecutor(t *testing.T) {
+func TestUpdateExecutor(t *testing.T) {
 	type TestData struct {
 		testName        string
 		sql             string
@@ -14,30 +16,41 @@ func TestCreateExecutor(t *testing.T) {
 		expectedError   string
 	}
 
-	defer clearAllDatabase()
+	defer testHelpers.ClearAllTestDatabase()
+
+	err := testHelpers.CreateTestDataBase()
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = testHelpers.SeedTestDatabase()
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	testData := []TestData{
 		{
-			testName: "success create table",
+			testName: "success update table",
 			sql: `
-			CREATE TABLE users (
-				id int AUTO_INCREMENT,
-				name text NULL,
-				age int,
-				is_admin bool,
-				date date
-			);
+				UPDATE users
+				SET is_admin = true
+				WHERE
+				is_admin = false
 			`,
 			expectedSuccess: true,
-			expectedData:    "таблица users успешно создана",
+			expectedData:    "успешно обновлено 2 строк",
 			expectedError:   "",
 		},
 	}
 
 	for _, item := range testData {
-		result := Execute(item.sql)
+		result := database.Execute(item.sql)
 
-		executeResult := ExecuteResult{}
+		executeResult := database.ExecuteResult{}
 		err := json.Unmarshal([]byte(result), &executeResult)
 
 		if err != nil {

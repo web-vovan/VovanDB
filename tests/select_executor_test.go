@@ -1,8 +1,10 @@
-package internal
+package tests
 
 import (
 	"encoding/json"
 	"testing"
+	testHelpers "vovanDB/tests/helpers"
+	"vovanDB/internal/database"
 )
 
 func TestSelectExecutor(t *testing.T) {
@@ -14,16 +16,16 @@ func TestSelectExecutor(t *testing.T) {
 		expectedError   string
 	}
 
-	defer clearAllDatabase()
+	defer testHelpers.ClearAllTestDatabase()
 
-	err := createTestDataBase()
+	err := testHelpers.CreateTestDataBase()
 
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	err = seedTestDatabase()
+	err = testHelpers.SeedTestDatabase()
 
 	if err != nil {
 		t.Error(err)
@@ -58,9 +60,9 @@ func TestSelectExecutor(t *testing.T) {
 	}
 
 	for _, item := range testData {
-		result := Execute(item.sql)
+		result := database.Execute(item.sql)
 
-		executeResult := ExecuteResult{}
+		executeResult := database.ExecuteResult{}
 		err := json.Unmarshal([]byte(result), &executeResult)
 
 		if err != nil {

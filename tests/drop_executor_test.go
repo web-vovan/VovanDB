@@ -1,8 +1,12 @@
-package internal
+package tests
 
 import (
 	"encoding/json"
 	"testing"
+	"vovanDB/internal/helpers"
+	schemaHelpers "vovanDB/internal/schema/helpers"
+	testHelpers "vovanDB/tests/helpers"
+	"vovanDB/internal/database"
 )
 
 func TestDropExecutor(t *testing.T) {
@@ -14,16 +18,16 @@ func TestDropExecutor(t *testing.T) {
 		expectedError   string
 	}
 
-	defer clearAllDatabase()
+	defer testHelpers.ClearAllTestDatabase()
 
-	err := createTestDataBase()
+	err := testHelpers.CreateTestDataBase()
 
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	err = seedTestDatabase()
+	err = testHelpers.SeedTestDatabase()
 
 	if err != nil {
 		t.Error(err)
@@ -40,9 +44,9 @@ func TestDropExecutor(t *testing.T) {
 		expectedError:   "",
 	}
 
-	result := Execute(testData.sql)
+	result := database.Execute(testData.sql)
 
-	executeResult := ExecuteResult{}
+	executeResult := database.ExecuteResult{}
 	err = json.Unmarshal([]byte(result), &executeResult)
 
 	if err != nil {
@@ -61,13 +65,13 @@ func TestDropExecutor(t *testing.T) {
 		t.Errorf("test error: %s, expected: %s, result: %s", testData.testName, testData.expectedError, executeResult.Error)
 	}
 
-	_, err = getSchema("users")
+	_, err = schemaHelpers.GetSchema("users")
 
 	if err == nil {
 		t.Errorf("test error: файл схемы не удален")
 	}
 
-	_, err = getTableData("users")
+	_, err = helpers.GetTableData("users")
 
 	if err == nil {
 		t.Errorf("test error: файл таблицы не удален")

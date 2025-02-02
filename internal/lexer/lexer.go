@@ -1,10 +1,11 @@
-package internal
+package lexer
 
 import (
 	"fmt"
 	"strings"
 	"unicode"
 	"vovanDB/internal/constants"
+	"vovanDB/internal/helpers"
 )
 
 type Lexer struct {
@@ -173,14 +174,14 @@ func (l *Lexer) getStringLiteralToken() (Token, error) {
 		return Token{}, fmt.Errorf("отсутствует закрывающая кавычка для строки")
 	}
 
-	if isValidDate(builder.String()) {
+	if helpers.IsValidDate(builder.String()) {
 		return Token{
 			Type:  constants.TYPE_DATE,
 			Value: builder.String(),
 		}, nil
 	}
 
-	if isValidDatetime(builder.String()) {
+	if helpers.IsValidDatetime(builder.String()) {
 		return Token{
 			Type:  constants.TYPE_DATETIME,
 			Value: builder.String(),
