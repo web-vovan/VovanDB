@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 	"vovanDB/internal/constants"
 	"vovanDB/internal/helpers"
 )
@@ -72,12 +73,15 @@ func (l *Lexer) Analyze() ([]Token, error) {
 func (l *Lexer) next() rune {
 	currentCh := l.Ch
 
-	l.Position++
+	var width int
+    currentCh, width = utf8.DecodeRuneInString(l.Input[l.Position:]) // Декодируем руну
+
+	l.Position += width
 
 	if l.Position >= len(l.Input) {
 		l.Ch = 0
 	} else {
-		l.Ch = rune(l.Input[l.Position])
+		l.Ch, _ = utf8.DecodeRuneInString(l.Input[l.Position:])
 	}
 
 	return currentCh
