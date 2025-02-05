@@ -46,6 +46,14 @@ func (l *Lexer) Analyze() ([]Token, error) {
 			}
 
 			tokens = append(tokens, token)
+		} else if l.isBacktick() {
+			token, err := l.getBacktickToken()
+
+			if err != nil {
+				return nil, err
+			}
+
+			tokens = append(tokens, token)
 		} else if l.isDigit() {
 			tokens = append(tokens, l.getDigitToken())
 		} else if l.isOperator() {
@@ -108,6 +116,11 @@ func (l *Lexer) isSymbol() bool {
 // Проверка текущего символа на одинарную кавычку (в них строковые литералы)
 func (l *Lexer) isStringLiteral() bool {
 	return string(l.current()) == "'"
+}
+
+// Проверка текущего символа на обратный апостроф 
+func (l *Lexer) isBacktick() bool {
+	return string(l.current()) == "`"
 }
 
 // Проверка текущего символа на конец строки
@@ -190,6 +203,40 @@ func (l *Lexer) getStringLiteralToken() (Token, error) {
 
 	return Token{
 		Type:  constants.TYPE_STRING,
+		Value: builder.String(),
+	}, nil
+}
+
+// Получение токена обратного апострофа
+func (l *Lexer) getBacktickToken() (Token, error) {
+	var builder strings.Builder
+
+	if l.isBacktick() {
+		l.next()
+	}
+
+	hasEndBacktick := false
+
+	for {
+		if l.isEnd() {
+			break
+		}
+
+		if l.isBacktick() {
+			hasEndBacktick = true
+			l.next()
+			break
+		}
+
+		builder.WriteRune(l.next())
+	}
+
+	if !hasEndBacktick {
+		return Token{}, fmt.Errorf("отсутствует закрывающий обратный апостроф `")
+	}
+
+	return Token{
+		Type:  constants.TYPE_IDENTIFIER,
 		Value: builder.String(),
 	}, nil
 }
