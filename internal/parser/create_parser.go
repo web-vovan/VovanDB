@@ -106,14 +106,14 @@ func createParser(p *Parser) (SQLQuery, error) {
 func (p *Parser) getCreateColumn() (CreateColumn, error) {
     nilCreateColumn := CreateColumn{}
 
-    if p.isIdentifier() {
-        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок1")
+    if !p.isIdentifier() {
+        return nilCreateColumn, fmt.Errorf("ошибка в структуре create, неверное имя для колонки %s", p.current().Value)
     }
 
     name := p.next().Value
 
     if !p.isIdentifier() {
-        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок2")
+        return nilCreateColumn, fmt.Errorf("ошибка в структуре create, неверный тип для колонки %s", p.current().Value)
     }
     
     typeText := strings.ToUpper(p.next().Value)
@@ -121,7 +121,7 @@ func (p *Parser) getCreateColumn() (CreateColumn, error) {
     columnType := constants.ColumnTypes[typeText]
 
     if columnType == 0 {
-        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок3")
+        return nilCreateColumn, fmt.Errorf("ошибка в структуре create, не удалось определить тип для колонки %s", p.current().Value)
     }
 
 	notNull := true
@@ -130,7 +130,7 @@ func (p *Parser) getCreateColumn() (CreateColumn, error) {
 		p.next()
 
 		if !p.isNull() {
-			return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок4")
+			return nilCreateColumn, fmt.Errorf("ошибка в структуре create, после NOT ожидается выражение NULL, а указано %s", p.current().Value)
 		}
 
 		p.next()

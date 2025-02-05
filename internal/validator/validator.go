@@ -112,7 +112,12 @@ func ValidateCreateQuery(s parser.CreateQuery) error {
 		}
 	}
 
-	// Проверка что в колонке auto_increment установлен тип not null
+	// Проверка что в колонке auto_increment установлен тип not null = true
+	for _, column := range s.Columns {
+		if column.AutoIncrement && column.NotNull == false {
+			return fmt.Errorf("колонка %s auto_increment не может быть NULL", column.Name)
+		}
+	}
 
 	return nil
 }
