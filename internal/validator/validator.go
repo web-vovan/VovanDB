@@ -112,6 +112,8 @@ func ValidateCreateQuery(s parser.CreateQuery) error {
 		}
 	}
 
+	// Проверка что в колонке auto_increment установлен тип not null
+
 	return nil
 }
 

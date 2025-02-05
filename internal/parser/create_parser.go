@@ -106,7 +106,7 @@ func createParser(p *Parser) (SQLQuery, error) {
 func (p *Parser) getCreateColumn() (CreateColumn, error) {
     nilCreateColumn := CreateColumn{}
 
-    if !p.isIdentifier() {
+    if p.isIdentifier() {
         return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок1")
     }
 
@@ -124,7 +124,7 @@ func (p *Parser) getCreateColumn() (CreateColumn, error) {
         return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок3")
     }
 
-	notNull := false
+	notNull := true
 
 	if p.isNotKeyword() {
 		p.next()
@@ -147,7 +147,6 @@ func (p *Parser) getCreateColumn() (CreateColumn, error) {
 
 	if p.isAutoIncrementKeyword() {
 		autoIncrement = true
-		notNull = true
 		p.next()
 	}
 
