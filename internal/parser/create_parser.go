@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strings"
 	"vovanDB/internal/constants"
 )
 
@@ -100,4 +101,60 @@ func createParser(p *Parser) (SQLQuery, error) {
 		Table:   table,
 		Columns: columns,
 	}, nil
+}
+
+func (p *Parser) getCreateColumn() (CreateColumn, error) {
+    nilCreateColumn := CreateColumn{}
+
+    if !p.isIdentifier() {
+        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок1")
+    }
+
+    name := p.next().Value
+
+    if !p.isIdentifier() {
+        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок2")
+    }
+    
+    typeText := strings.ToUpper(p.next().Value)
+
+    columnType := constants.ColumnTypes[typeText]
+
+    if columnType == 0 {
+        return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок3")
+    }
+
+	notNull := false
+
+	if p.isNotKeyword() {
+		p.next()
+
+		if !p.isNull() {
+			return nilCreateColumn, fmt.Errorf("неверная структура в create при указании колонок4")
+		}
+
+		p.next()
+
+		notNull = true
+	}
+
+	if p.isNull() {
+		notNull = false
+		p.next()
+	}
+
+	autoIncrement := false
+
+	if p.isAutoIncrementKeyword() {
+		autoIncrement = true
+		notNull = true
+		p.next()
+	}
+
+    return CreateColumn{
+        Name: name,
+        Type: columnType,
+		AutoIncrement: autoIncrement,
+		NotNull: notNull,
+    }, nil
 }
