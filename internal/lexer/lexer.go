@@ -37,6 +37,17 @@ func (l *Lexer) Analyze() ([]Token, error) {
 			continue
 		}
 
+		// Пропускаем комментарии
+		if l.isDashSymbol() {
+			err := l.clearComment()
+
+			if err != nil {
+				return nil, err
+			}
+
+			continue
+		}
+
 		if l.isString() {
 			tokens = append(tokens, l.getStringToken())
 		} else if l.isStringLiteral() {
@@ -97,6 +108,11 @@ func (l *Lexer) isSpace() bool {
 	return unicode.IsSpace(l.current())
 }
 
+// Проверка текущего символа на конец строки
+func (l *Lexer) isLineFeed() bool {
+	return l.current() == '\n'
+}
+
 // Проверка текущего символа на строку
 func (l *Lexer) isString() bool {
 	return unicode.IsLetter(l.current())
@@ -119,12 +135,17 @@ func (l *Lexer) isSymbol() bool {
 
 // Проверка текущего символа на одинарную кавычку (в них строковые литералы)
 func (l *Lexer) isStringLiteral() bool {
-	return string(l.current()) == "'"
+	return l.current() == '\''
+}
+
+// Проверка текущего символа дефис (с него начинаются комментарии)
+func (l *Lexer) isDashSymbol() bool {
+	return l.current() == '-'
 }
 
 // Проверка текущего символа на обратный апостроф 
 func (l *Lexer) isBacktick() bool {
-	return string(l.current()) == "`"
+	return l.current() == '`'
 }
 
 // Проверка текущего символа на конец строки
@@ -279,4 +300,33 @@ func (l *Lexer) getSymbolToken() Token {
 		Type:  constants.TYPE_SYMBOL,
 		Value: string(l.next()),
 	}
+}
+
+// Очистка от комментариев
+func (l *Lexer) clearComment() error {
+	l.next()
+
+	if !l.isDashSymbol() {
+		return fmt.Errorf("неверный формат комментариев")
+	}
+
+	l.next()
+
+	if l.isLineFeed() {
+		return nil
+	}
+
+	if l.current() != ' ' {
+		return fmt.Errorf("неверный формат комментариев, отсутствует пробел")
+	}
+
+	for {
+		if l.isEnd() || l.isLineFeed() {
+			break
+		}
+
+		l.next()
+	}
+
+	return nil
 }

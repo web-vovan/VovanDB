@@ -22,6 +22,7 @@ func TestCreateExecutor(t *testing.T) {
 		{
 			testName: "success create table",
 			sql: `
+			-- какой-то комментарий
 			CREATE TABLE users (
 				id int AUTO_INCREMENT,
 				name text NULL,
@@ -30,6 +31,13 @@ func TestCreateExecutor(t *testing.T) {
 				date date
 			);
 			`,
+			expectedSuccess: true,
+			expectedData:    "таблица users успешно создана",
+			expectedError:   "",
+		},
+		{
+			testName: "success create table",
+			sql: "CREATE TABLE users (id int AUTO_INCREMENT,`name` text NULL,age int,is_admin bool,`date` date)",
 			expectedSuccess: true,
 			expectedData:    "таблица users успешно создана",
 			expectedError:   "",
@@ -57,5 +65,7 @@ func TestCreateExecutor(t *testing.T) {
 		if executeResult.Error != item.expectedError {
 			t.Errorf("test error: %s, expected: %s, result: %s", item.testName, item.expectedError, executeResult.Error)
 		}
+
+		testHelpers.ClearAllTestDatabase()
 	}
 }
