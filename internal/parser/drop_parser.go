@@ -22,7 +22,7 @@ func dropParser(p *Parser) (SQLQuery, error) {
 	if p.isDropQuery() {
 		p.next()
 	} else {
-		return nil, fmt.Errorf("неверная структура запроса для drop")
+		return nil, fmt.Errorf("парсер поддерживает только drop запрос")
 	}
 
 	if !p.isAndKeyword() && p.current().Value != "TABLE" {

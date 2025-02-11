@@ -37,7 +37,7 @@ func createParser(p *Parser) (SQLQuery, error) {
 	if p.isCreateQuery() {
 		p.next()
 	} else {
-		return nil, fmt.Errorf("неверная структура запроса для create")
+		return nil, fmt.Errorf("парсер поддерживает только create запрос")
 	}
 
 	if !p.isAndKeyword() && p.current().Value != "TABLE" {

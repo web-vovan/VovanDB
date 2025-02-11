@@ -88,6 +88,30 @@ func ValidateUpdateQuery(s parser.UpdateQuery) error {
 	return nil
 }
 
+func ValidateDeleteQuery(s parser.DeleteQuery) error {
+	tableName := s.Table
+
+	// Существование таблицы
+	if !helpers.FileExists(helpers.GetPathTableSchema(tableName)) || !helpers.FileExists(helpers.GetPathTableData(tableName)) {
+		return fmt.Errorf("невозможно выполнить запрос, таблица %s не существует", tableName)
+	}
+
+	// Загружаем схему
+	schema, err := schemaHelpers.GetSchema(tableName)
+
+	if err != nil {
+		return err
+	}
+
+	err = ValidateConditions(schema, s.Conditions)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func ValidateCreateQuery(s parser.CreateQuery) error {
 	// Существование таблицы
 	if helpers.FileExists(helpers.GetPathTableSchema(s.Table)) || helpers.FileExists(helpers.GetPathTableData(s.Table)) {

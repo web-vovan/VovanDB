@@ -27,7 +27,7 @@ func insertParser(p *Parser) (SQLQuery, error) {
 	if p.isInsertQuery() {
 		p.next()
 	} else {
-		return nil, fmt.Errorf("неверная структура запроса для insert1")
+		return nil, fmt.Errorf("парсер поддерживает только insert запрос")
 	}
 
 	if !p.isAndKeyword() && p.current().Value != "INTO" {

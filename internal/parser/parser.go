@@ -42,8 +42,10 @@ func (p *Parser) Parse() (SQLQuery, error) {
         sqlQuery, err = insertParser(p)
     } else if p.isUpdateQuery() {
         sqlQuery, err = updateParser(p)
+    } else if p.isDeleteQuery() {
+        sqlQuery, err = deleteParser(p)
     } else {
-		return sqlQuery, fmt.Errorf("данный тип запроса пока не поддерживается %s", p.Tokens[0].Value)
+		return sqlQuery, fmt.Errorf("тип запроса - %s, пока не поддерживается", p.Tokens[0].Value)
 	}
 
 	if err != nil {
@@ -96,6 +98,10 @@ func (p *Parser) isInsertQuery() bool {
 
 func (p *Parser) isUpdateQuery() bool {
     return p.isKeyword() && p.current().Value == "UPDATE"
+}
+
+func (p *Parser) isDeleteQuery() bool {
+    return p.isKeyword() && p.current().Value == "DELETE"
 }
 
 func (p *Parser) isIdentifier() bool {

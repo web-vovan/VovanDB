@@ -87,6 +87,20 @@ func (e *Executor) ExecuteQuery() (string, error) {
 		}
 
 		return data, err
+	case parser.DeleteQuery:
+		deleteQuery, ok := e.sqlQuery.(parser.DeleteQuery)
+
+		if !ok {
+			return "", fmt.Errorf("ошибка при преобразовании типа DeleteQuery")
+		}
+
+		data, err := deleteExecutor(deleteQuery)
+
+		if err != nil {
+			return "", err
+		}
+
+		return data, err
 	}
 
 	return "", fmt.Errorf("данный тип запросов не поддерживается")

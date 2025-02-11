@@ -29,7 +29,7 @@ func updateParser(p *Parser) (SQLQuery, error) {
 	if p.isUpdateQuery() {
 		p.next()
 	} else {
-		return nil, fmt.Errorf("неверная структура запроса1")
+		return nil, fmt.Errorf("парсер поддерживает только update запрос")
 	}
 
 	// Таблица

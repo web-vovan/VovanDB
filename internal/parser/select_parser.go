@@ -31,7 +31,7 @@ func selectParser(p *Parser) (SQLQuery, error) {
 	if p.isSelectQuery() {
 		p.next()
 	} else {
-		return nil, fmt.Errorf("неверная структура запроса1")
+		return nil, fmt.Errorf("парсер поддерживает только select запрос")
 	}
 
 	// Колонки

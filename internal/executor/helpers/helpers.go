@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bytes"
 	"vovanDB/internal/schema"
 	"vovanDB/internal/condition"
 )
@@ -97,4 +98,23 @@ func GetMatchingColumnIndices(tableSchema *schema.TableSchema, columns []string)
 	}
 
     return result, nil
+}
+
+// Подготовка строки для записи в таблицу с данными
+func TransformArrStringToRowData(r []string) []byte {
+	var rowBuffer bytes.Buffer
+
+	countValues := len(r)
+
+	for i, v := range r {
+		rowBuffer.WriteString(v)
+
+		if i < countValues-1 {
+			rowBuffer.WriteString(";")
+		}
+	}
+
+	rowBuffer.WriteString("\n")
+
+	return rowBuffer.Bytes()
 }

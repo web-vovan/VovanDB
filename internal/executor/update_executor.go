@@ -72,7 +72,7 @@ func updateExecutor(s parser.UpdateQuery) (string, error) {
 	var updateData bytes.Buffer
 
 	for _, row := range tableData {
-		updateData.Write(getUpdateRowData(row))
+		updateData.Write(executorHelpers.TransformArrStringToRowData(row))
 	}
 
 	file, err := os.Create(helpers.GetPathTableData(tableName))
@@ -90,23 +90,4 @@ func updateExecutor(s parser.UpdateQuery) (string, error) {
 	}
 
 	return fmt.Sprintf("успешно обновлено %d строк", len(matchingRowIndices)), nil
-}
-
-// Получение строки с данными
-func getUpdateRowData(r []string) []byte {
-	var rowBuffer bytes.Buffer
-
-	countValues := len(r)
-
-	for i, v := range r {
-		rowBuffer.WriteString(v)
-
-		if i < countValues-1 {
-			rowBuffer.WriteString(";")
-		}
-	}
-
-	rowBuffer.WriteString("\n")
-
-	return rowBuffer.Bytes()
 }

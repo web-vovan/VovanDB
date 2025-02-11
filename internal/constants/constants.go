@@ -42,6 +42,7 @@ var Keywords = map[string]bool{
 	"INTO":           true,
 	"VALUES":         true,
 	"UPDATE":         true,
+	"DELETE":         true,
 	"SET":            true,
 	"AUTO_INCREMENT": true,
 	"NOT":            true,
