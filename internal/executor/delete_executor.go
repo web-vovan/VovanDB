@@ -33,8 +33,6 @@ func deleteExecutor(s parser.DeleteQuery) (string, error) {
 	// Индексы подходящих строк
 	matchingRowIndices, err := executorHelpers.GetMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
 
-	fmt.Println(matchingRowIndices)
-
 	if err != nil {
 		return "", err
 	}
