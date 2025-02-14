@@ -29,8 +29,8 @@ func selectExecutor(s parser.SelectQuery) (string, error) {
 		return "", err
 	}
 
-	// Индексы неподходящих строк
-	notMatchingRowIndices, err := executorHelpers.GetNotMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
+	// Индексы подходящих строк
+	matchingRowIndices, err := executorHelpers.GetMatchingRowIndices(&tableData, &tableSchema, &s.Conditions)
 
 	if err != nil {
 		return "", err
@@ -45,14 +45,14 @@ func selectExecutor(s parser.SelectQuery) (string, error) {
 
 	var builder strings.Builder
 
-	countRows := len(tableData) - len(notMatchingRowIndices)
+	countRows := len(tableData) - len(matchingRowIndices)
 	countColumns := len(matchingColumnIndices)
 
 	builder.WriteString("[")
 
 	for i, line := range tableData {
 		// Пропускаем строку, не подходящую под фильтр
-		if _, ok := notMatchingRowIndices[i]; ok {
+		if _, ok := matchingRowIndices[i]; !ok {
 			continue
 		}
 

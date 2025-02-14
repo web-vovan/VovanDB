@@ -132,6 +132,14 @@ func (p *Parser) isBool() bool {
     return p.current().Type == constants.TYPE_BOOL
 }
 
+func (p *Parser) isDate() bool {
+    return p.current().Type == constants.TYPE_DATE
+}
+
+func (p *Parser) isDatetime() bool {
+    return p.current().Type == constants.TYPE_DATETIME
+}
+
 func (p *Parser) isNull() bool {
     return p.current().Type == constants.TYPE_NULL
 }
@@ -187,7 +195,7 @@ func (p *Parser) getCondition() (condition.Condition, error) {
 
     operator := p.next().Value
 
-    if !p.isString() && !p.isDigit() && !p.isBool() && !p.isNull() {
+    if !p.isString() && !p.isDigit() && !p.isBool() && !p.isNull() && !p.isDate() && !p.isDatetime(){
         return nilCondition, fmt.Errorf("неверная структура в условии where, неподдерживаемый тип в условии")
     }
 

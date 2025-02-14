@@ -57,6 +57,18 @@ func TestSelectExecutor(t *testing.T) {
 			expectedData:    "[{\"id\":2,\"name\":\"katya\"}{\"id\":3,\"name\":\"sacha\"}]",
 			expectedError:   "",
 		},
+		{
+			testName: "success select table",
+			sql: `
+				SELECT id, name, age
+				FROM users
+				WHERE
+				age > 33
+			`,
+			expectedSuccess: true,
+			expectedData:    "[{\"id\":1,\"name\":\"vova\",\"age\":38}{\"id\":3,\"name\":\"sacha\",\"age\":38}]",
+			expectedError:   "",
+		},
 	}
 
 	for _, item := range testData {

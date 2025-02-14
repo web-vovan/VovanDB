@@ -19,7 +19,13 @@ func GetMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchem
 	for i, line := range *tableData {
 		hasFiltered := true
 		for j, condition := range mapConditions {
-			if condition.Value != line[j] {
+			compareResult, err := condition.Compare(line[j])
+
+			if err != nil {
+				return result, err
+			}
+
+			if !compareResult {
 				hasFiltered = false
 				break
 			}
@@ -31,33 +37,6 @@ func GetMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchem
 	}
 
     return result, nil
-}
-
-// Индексы строк, неудовлетворяющие фильтру
-func GetNotMatchingRowIndices(tableData *[][]string, tableSchema *schema.TableSchema, conditions *[]condition.Condition) (map[int]bool, error) {
-	var result = make(map[int]bool)
-
-	mapConditions, err := TransformConditionsToMap(tableSchema, conditions)
-
-	if err != nil {
-		return result, err
-	}
-
-	for i, line := range *tableData {
-		hasFiltered := false
-		for j, condition := range mapConditions {
-			if condition.Value != line[j] {
-				hasFiltered = true
-				break
-			}
-		}
-
-		if hasFiltered {
-			result[i] = true
-		}
-	}
-
-	return result, nil
 }
 
 // Преобразование массива с условиями в мапу
