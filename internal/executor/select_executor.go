@@ -45,10 +45,11 @@ func selectExecutor(s parser.SelectQuery) (string, error) {
 
 	var builder strings.Builder
 
-	countRows := len(tableData) - len(matchingRowIndices)
+	countRows := len(matchingRowIndices)
 	countColumns := len(matchingColumnIndices)
 
 	builder.WriteString("[")
+	addRows := 1
 
 	for i, line := range tableData {
 		// Пропускаем строку, не подходящую под фильтр
@@ -81,8 +82,9 @@ func selectExecutor(s parser.SelectQuery) (string, error) {
 
 		builder.WriteString("}")
 
-		if i < countRows-1 {
+		if addRows < countRows {
 			builder.WriteString(",")
+			addRows++
 		}
 	}
 
