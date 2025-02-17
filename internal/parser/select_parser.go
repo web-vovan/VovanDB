@@ -5,14 +5,20 @@ import (
 	"vovanDB/internal/condition"
 )
 
+type Sorting struct {
+	Field     string
+	Direction string
+}
+
 type SelectQuery struct {
 	Table      string
 	Columns    []string
 	Conditions []condition.Condition
+	Sorting    Sorting
 }
 
 func (q SelectQuery) String() string {
-	return fmt.Sprintf("Table: %s\nColumns: %s\nConditions: \n%s", q.Table, q.Columns, q.Conditions)
+	return fmt.Sprintf("Table: %s\nColumns: %s\nConditions: \n%s\nSorting: %s\n", q.Table, q.Columns, q.Conditions, q.Sorting)
 }
 
 func (q SelectQuery) QueryType() string {
@@ -26,7 +32,9 @@ func (q SelectQuery) showAllColumns() bool {
 func selectParser(p *Parser) (SQLQuery, error) {
 	var columns []string
 	var table string
-	var conditions []condition.Condition
+	var orderField string
+	var orderDirection = "ASC"
+	conditions  := []condition.Condition{}
 
 	if p.isSelectQuery() {
 		p.next()
@@ -45,14 +53,14 @@ func selectParser(p *Parser) (SQLQuery, error) {
 	}
 
 	if p.isEnd() || p.current().Value != "FROM" {
-		return nil, fmt.Errorf("неверная структура запроса2")
+		return nil, fmt.Errorf("неверная структура select запроса, ожидается - FROM, указано - %s", p.current().Value)
 	}
 
 	p.next()
 
 	// Таблица
 	if !p.isIdentifier() {
-		return nil, fmt.Errorf("неверная структура запроса3")
+		return nil, fmt.Errorf("неверная структура select запроса, ожидается идентификатор")
 	}
 
 	table = p.next().Value
@@ -66,7 +74,7 @@ func selectParser(p *Parser) (SQLQuery, error) {
 				Columns: columns,
 			}, nil
 		} else {
-			return nil, fmt.Errorf("неверная структура запроса4")
+			return nil, fmt.Errorf("неверная структура select запроса, указаны данные после ;")
 		}
 	}
 
@@ -77,17 +85,38 @@ func selectParser(p *Parser) (SQLQuery, error) {
 		}, nil
 	}
 
-	if p.current().Value != "WHERE" {
-		return nil, fmt.Errorf("неверная структура запроса5")
+	if p.current().Value == "WHERE" {
+
+		p.next()
+
+		// Условия
+		conditionsList, err := p.getArrayConditions()
+
+		if err != nil {
+			return nil, err
+		}
+
+		conditions = conditionsList
 	}
 
-	p.next()
+	if p.current().Value == "ORDER" {
+		p.next()
 
-	// Условия
-	conditions, err := p.getArrayConditions()
+		if p.current().Value != "BY" {
+			return nil, fmt.Errorf("неверная структура select запроса, ожидается - BY, указано - %s", p.current().Value)
+		}
 
-	if err != nil {
-		return nil, err
+		p.next()
+
+		if !p.isIdentifier() {
+			return nil, fmt.Errorf("неверная структура select запроса, в ORDER BY ожидается идентификатор")
+		}
+
+		orderField = p.next().Value
+
+		if p.current().Value == "ASC" || p.current().Value == "DESC" {
+			orderDirection = p.next().Value
+		}
 	}
 
 	if p.isSemicolon() {
@@ -95,12 +124,16 @@ func selectParser(p *Parser) (SQLQuery, error) {
 	}
 
 	if !p.isEnd() {
-		return nil, fmt.Errorf("неверная структура запроса6")
+		return nil, fmt.Errorf("неверная структура select запроса, ожидается - конец запроса, указано - %s", p.current().Value)
 	}
 
 	return SelectQuery{
 		Table:      table,
 		Columns:    columns,
 		Conditions: conditions,
+		Sorting: Sorting{
+			Field: orderField,
+			Direction: orderDirection,
+		},
 	}, nil
 }

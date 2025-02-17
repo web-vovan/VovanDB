@@ -68,6 +68,28 @@ func TestSelectExecutor(t *testing.T) {
 			expectedError:   "",
 		},
 		{
+			testName: "success select table order desc",
+			sql: `
+				SELECT age
+				FROM users
+				ORDER BY age DESC
+			`,
+			expectedSuccess: true,
+			expectedData:    "[{\"age\":38},{\"age\":38},{\"age\":33}]",
+			expectedError:   "",
+		},
+		{
+			testName: "success select table asc",
+			sql: `
+				SELECT age
+				FROM users
+				ORDER BY age ASC
+			`,
+			expectedSuccess: true,
+			expectedData:    "[{\"age\":33},{\"age\":38},{\"age\":38}]",
+			expectedError:   "",
+		},
+		{
 			testName: "success select table",
 			sql: `
 				SELECT id, name, age

@@ -41,6 +41,13 @@ func ValidateSelectQuery(s parser.SelectQuery) error {
 		return err
 	}
 
+	// Проверка поля в сортировке
+	if s.Sorting.Field != "" {
+		if !schema.HasColumnInSchema(s.Sorting.Field) {
+			return fmt.Errorf("запрос невалиден, в таблице %s нет колонки %s для сортировки", tableName, s.Sorting.Field)
+		}
+	}
+
 	return nil
 }
 

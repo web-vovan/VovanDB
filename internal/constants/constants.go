@@ -46,6 +46,10 @@ var Keywords = map[string]bool{
 	"SET":            true,
 	"AUTO_INCREMENT": true,
 	"NOT":            true,
+	"ORDER":          true,
+	"BY":             true,
+	"ASC":            true,
+	"DESC":           true,
 }
 
 // Булевы выражения
@@ -79,9 +83,9 @@ var Null = map[string]bool{
 
 // Типы данных колонок
 var ColumnTypes = map[string]int{
-	"INT":  TYPE_DIGIT,
-	"TEXT": TYPE_STRING,
-	"BOOL": TYPE_BOOL,
-	"DATE": TYPE_DATE,
+	"INT":      TYPE_DIGIT,
+	"TEXT":     TYPE_STRING,
+	"BOOL":     TYPE_BOOL,
+	"DATE":     TYPE_DATE,
 	"DATETIME": TYPE_DATETIME,
 }

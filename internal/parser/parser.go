@@ -255,7 +255,7 @@ func (p *Parser) getArrayConditions() ([]condition.Condition, error) {
 
     // Условия
 	for {
-		if p.isEnd() || p.isSemicolon() {
+		if p.isEnd() || p.isSemicolon() || p.current().Value == "ORDER" {
 			break
 		}
 
