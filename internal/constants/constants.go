@@ -54,8 +54,8 @@ var Keywords = map[string]bool{
 
 // Булевы выражения
 var Bools = map[string]bool{
-	"TRUE":  true,
-	"FALSE": true,
+	"true":  true,
+	"false": true,
 }
 
 // Операторы

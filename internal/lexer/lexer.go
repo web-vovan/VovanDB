@@ -168,9 +168,9 @@ func (l *Lexer) getStringToken() Token {
 	if constants.Keywords[strings.ToUpper(result)] {
 		tokenType = constants.TYPE_KEYWORD
 		result = strings.ToUpper(result)
-	} else if constants.Bools[strings.ToUpper(result)] {
+	} else if constants.Bools[strings.ToLower(result)] {
 		tokenType = constants.TYPE_BOOL
-		result = strings.ToUpper(result)
+		result = strings.ToLower(result)
 	} else if constants.Null[strings.ToUpper(result)] {
 		tokenType = constants.TYPE_NULL
 		result = strings.ToUpper(result)

@@ -42,7 +42,7 @@ func TestSelectExecutor(t *testing.T) {
 				is_admin = false
 			`,
 			expectedSuccess: true,
-			expectedData:    "[{\"id\":2,\"name\":\"katya\",\"age\":33,\"is_admin\":FALSE,\"date\":\"2025-01-28\"},{\"id\":3,\"name\":\"sacha\",\"age\":38,\"is_admin\":FALSE,\"date\":\"2025-01-28\"}]",
+			expectedData:    "[{\"id\":2,\"name\":\"katya\",\"age\":33,\"is_admin\":false,\"date\":\"2025-01-28\"},{\"id\":3,\"name\":\"sacha\",\"age\":38,\"is_admin\":false,\"date\":\"2025-01-28\"}]",
 			expectedError:   "",
 		},
 		{
@@ -52,7 +52,7 @@ func TestSelectExecutor(t *testing.T) {
 				FROM users
 			`,
 			expectedSuccess: true,
-			expectedData:    "[{\"id\":1,\"name\":\"vova\",\"age\":38,\"is_admin\":TRUE,\"date\":\"2025-01-28\"},{\"id\":2,\"name\":\"katya\",\"age\":33,\"is_admin\":FALSE,\"date\":\"2025-01-28\"},{\"id\":3,\"name\":\"sacha\",\"age\":38,\"is_admin\":FALSE,\"date\":\"2025-01-28\"}]",
+			expectedData:    "[{\"id\":1,\"name\":\"vova\",\"age\":38,\"is_admin\":true,\"date\":\"2025-01-28\"},{\"id\":2,\"name\":\"katya\",\"age\":33,\"is_admin\":false,\"date\":\"2025-01-28\"},{\"id\":3,\"name\":\"sacha\",\"age\":38,\"is_admin\":false,\"date\":\"2025-01-28\"}]",
 			expectedError:   "",
 		},
 		{
