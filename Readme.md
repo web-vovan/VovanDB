@@ -1,16 +1,25 @@
 **VovanDB** - файловая база данных, написанная на go.
 
-Поддерживается:
-* CREATE TABLE
-* DROP TABLE
-* INSERT
-* SELECT
-* UPDATE
+Типы данных:
+
+- text
+- int
+- bool
+- datetime
+- date
+
+Подходит для работы с небольшими проектами, в которых нужны самые базовые операции по работе с данными.
+
+Схема хранится в формате json, данные в csv.
+
+Поддерживается CRUD-запросы (create, select, update, delete).
+
+Не поддерживаются join, индексы, вложенные запросы, агрегатные функции, группировка, обновление схемы (alter).
 
 Примеры запросов:
 
 ```sql
--- CREATE TABLE
+-- CREATE
 CREATE TABLE users (
     id int AUTO_INCREMENT,
     name text NULL,
@@ -19,7 +28,7 @@ CREATE TABLE users (
     date date
 );
 
--- DROP TABLE
+-- DROP
 DROP TABLE users;
 
 -- INSERT
@@ -37,21 +46,22 @@ FROM
     users
 WHERE
     is_admin = false
+ORDER BY
+    id DESC
 
 -- UPDATE
 UPDATE
     users
 SET 
-    is_admin = true
+    is_admin = true,
+    date = '2025-02-28'
 WHERE
     is_admin = false
 ```
 
-Нет поддержки:
-* JOIN
-* Индексы
-* ALTER TABLE
-* GROUP BY
-* HAVING
-* Агрегатные функции
+Запуск тестов
+
+```bach
+go test ./tests -v   
+```
 
