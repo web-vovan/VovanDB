@@ -305,7 +305,7 @@ func (p *Parser) getUpdateValues() ([]UpdateValue, error) {
 
 		p.next()
 
-		if p.isString() || p.isBool() || p.isDigit() {
+		if p.isString() || p.isBool() || p.isDigit() || p.isDate() || p.isDatetime() {
 			columnValue := p.current().Value
 			columnType := p.current().Type
 

@@ -62,6 +62,6 @@ WHERE
 Запуск тестов
 
 ```bach
-go test ./tests -v   
+go test ./tests -v
 ```
 
