@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"encoding/json"
 	"testing"
 	testHelpers "vovanDB/tests/helpers"
 	"vovanDB/internal/database"
@@ -104,14 +103,7 @@ func TestSelectExecutor(t *testing.T) {
 	}
 
 	for _, item := range testData {
-		result := database.Execute(item.sql)
-
-		executeResult := database.ExecuteResult{}
-		err := json.Unmarshal([]byte(result), &executeResult)
-
-		if err != nil {
-			t.Error(err)
-		}
+		executeResult := database.Execute(item.sql)
 
 		if executeResult.Success != item.expectedSuccess {
 			t.Errorf("test error: %s, expected: %v, result: %v", item.testName, item.expectedSuccess, executeResult.Success)

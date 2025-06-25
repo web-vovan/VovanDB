@@ -1,18 +1,29 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"vovanDB/internal/database"
 )
 
 func Run() {
+	var executeResult database.ExecuteResult
+
     if len(os.Args) != 2 {
-		fmt.Println(database.ErrorArgs())
-		return
+		executeResult = database.ExecuteResult{
+            Success: false,
+            Error:   "Ожидается один параметр в качестве sql запроса",
+        }
+	} else {
+		sql := os.Args[1]
+		executeResult = database.Execute(sql)
 	}
 
-	sql := os.Args[1]
+	result, err := json.Marshal(executeResult)
+	if err != nil {
+		fmt.Println("Ошибка после выполнения запроса: %w", err)
+	}
 
-	fmt.Println(database.Execute(sql))
+	fmt.Println(string(result))
 }

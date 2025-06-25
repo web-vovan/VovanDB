@@ -1,7 +1,6 @@
 package database
 
 import (
-	"encoding/json"
 	"runtime"
 	"time"
 	"fmt"
@@ -20,7 +19,7 @@ type ExecuteResult struct {
 	Memory  string `json:"memory"`
 }
 
-func Execute(sql string) string {
+func Execute(sql string) ExecuteResult {
     start := time.Now()
 
 	// Чтение .env файла
@@ -33,12 +32,7 @@ func Execute(sql string) string {
 	tokens, err := lexer.Analyze()
 
 	if err != nil {
-		result, _ := json.Marshal(
-			ExecuteResult{
-				Success: false,
-				Error:   err.Error(),
-			})
-		return string(result)
+		return getExecuteErrorResult(err)
 	}
 
 	// Парсер
@@ -48,12 +42,7 @@ func Execute(sql string) string {
 	sqlQuery, err := parser.Parse()
 
 	if err != nil {
-		result, _ := json.Marshal(
-			ExecuteResult{
-				Success: false,
-				Error:   err.Error(),
-			})
-		return string(result)
+		return getExecuteErrorResult(err)
 	}
 
 	// Executor
@@ -63,13 +52,7 @@ func Execute(sql string) string {
 	data, err := executor.ExecuteQuery()
 
 	if err != nil {
-		result, _ := json.Marshal(
-			ExecuteResult{
-				Success: false,
-				Error:   err.Error(),
-			})
-
-		return string(result)
+		return getExecuteErrorResult(err)
 	}
 
 	duration := time.Since(start)
@@ -77,26 +60,20 @@ func Execute(sql string) string {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 
-	result, _ := json.Marshal(
-		ExecuteResult{
-			Success: true,
-			Data:    data,
-			Error:   "",
-			Time:    duration.String(),
-			Memory:  humanReadableBytes(memStats.Alloc),
-		})
-
-	return string(result)
+	return ExecuteResult{
+		Success: true,
+		Data:    data,
+		Error:   "",
+		Time:    duration.String(),
+		Memory:  humanReadableBytes(memStats.Alloc),
+	}
 }
 
-func ErrorArgs() string {
-    result, _ := json.Marshal(
-        ExecuteResult{
-            Success: false,
-            Error:   "Укажите один параметр в качестве sql запроса",
-        })
-
-    return string(result)
+func getExecuteErrorResult(err error) ExecuteResult {
+	return ExecuteResult{
+		Success: false,
+		Error:   err.Error(),
+	}
 }
 
 func humanReadableBytes(bytes uint64) string {

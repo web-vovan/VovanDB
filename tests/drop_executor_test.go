@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"encoding/json"
 	"testing"
 	"vovanDB/internal/helpers"
 	schemaHelpers "vovanDB/internal/schema/helpers"
@@ -44,14 +43,7 @@ func TestDropExecutor(t *testing.T) {
 		expectedError:   "",
 	}
 
-	result := database.Execute(testData.sql)
-
-	executeResult := database.ExecuteResult{}
-	err = json.Unmarshal([]byte(result), &executeResult)
-
-	if err != nil {
-		t.Error(err)
-	}
+	executeResult := database.Execute(testData.sql)
 
 	if executeResult.Success != testData.expectedSuccess {
 		t.Errorf("test error: %s, expected: %v, result: %v", testData.testName, testData.expectedSuccess, executeResult.Success)

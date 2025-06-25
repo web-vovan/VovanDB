@@ -57,6 +57,12 @@ SET
     date = '2025-02-28'
 WHERE
     is_admin = false
+
+-- DELETE
+DELETE FROM
+    users
+WHERE
+    is_admin = false
 ```
 
 Запуск тестов
