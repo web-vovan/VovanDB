@@ -19,7 +19,7 @@ type ExecuteResult struct {
 	Memory  string `json:"memory"`
 }
 
-func Execute(sql string) ExecuteResult {
+func Execute(sql string) *ExecuteResult {
     start := time.Now()
 
 	// Чтение .env файла
@@ -30,7 +30,6 @@ func Execute(sql string) ExecuteResult {
 
 	// Токены лексического анализа
 	tokens, err := lexer.Analyze()
-
 	if err != nil {
 		return getExecuteErrorResult(err)
 	}
@@ -40,7 +39,6 @@ func Execute(sql string) ExecuteResult {
 
 	// Подготовленный запрос
 	sqlQuery, err := parser.Parse()
-
 	if err != nil {
 		return getExecuteErrorResult(err)
 	}
@@ -50,7 +48,6 @@ func Execute(sql string) ExecuteResult {
 
 	// Выполняем запрос
 	data, err := executor.ExecuteQuery()
-
 	if err != nil {
 		return getExecuteErrorResult(err)
 	}
@@ -60,7 +57,7 @@ func Execute(sql string) ExecuteResult {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 
-	return ExecuteResult{
+	return &ExecuteResult{
 		Success: true,
 		Data:    data,
 		Error:   "",
@@ -69,8 +66,8 @@ func Execute(sql string) ExecuteResult {
 	}
 }
 
-func getExecuteErrorResult(err error) ExecuteResult {
-	return ExecuteResult{
+func getExecuteErrorResult(err error) *ExecuteResult {
+	return &ExecuteResult{
 		Success: false,
 		Error:   err.Error(),
 	}

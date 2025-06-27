@@ -4,21 +4,22 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
-	"unicode/utf8"
 	"vovanDB/internal/constants"
 	"vovanDB/internal/helpers"
 )
 
 type Lexer struct {
-	Input    string // запрос для лексического анализа
+	Sql      []rune // запрос для лексического анализа
 	Ch       rune   // текущий символ
 	Position int    // текущая позиция
 }
 
 func NewLexer(input string) *Lexer {
+	sql := []rune(input)
+
 	return &Lexer{
-		Input:    input,
-		Ch:       rune(input[0]),
+		Sql:      sql,
+		Ch:       sql[0],
 		Position: 0,
 	}
 }
@@ -28,23 +29,23 @@ func (l *Lexer) Analyze() ([]Token, error) {
 	var tokens []Token
 
 	for {
+		// Выходим если строка закончилась
 		if l.isEnd() {
 			break
 		}
 
+		// Пропускаем пробелы и переносы строк
 		if l.isSpace() {
 			l.next()
 			continue
 		}
 
 		// Пропускаем комментарии
-		if l.isDashSymbol() {
-			err := l.clearComment()
-
-			if err != nil {
-				return nil, err
-			}
-
+		isClearComment, err := l.clearComment()
+		if err != nil {
+			return nil, err
+		}
+		if isClearComment {
 			continue
 		}
 
@@ -52,7 +53,6 @@ func (l *Lexer) Analyze() ([]Token, error) {
 			tokens = append(tokens, l.getStringToken())
 		} else if l.isStringLiteral() {
 			token, err := l.getStringLiteralToken()
-
 			if err != nil {
 				return nil, err
 			}
@@ -60,7 +60,6 @@ func (l *Lexer) Analyze() ([]Token, error) {
 			tokens = append(tokens, token)
 		} else if l.isBacktick() {
 			token, err := l.getBacktickToken()
-
 			if err != nil {
 				return nil, err
 			}
@@ -73,92 +72,81 @@ func (l *Lexer) Analyze() ([]Token, error) {
 		} else if l.isSymbol() {
 			tokens = append(tokens, l.getSymbolToken())
 		} else {
-			return nil, fmt.Errorf("неизвестный символ %s в позиции %d", string(l.current()), l.Position)
+			return nil, fmt.Errorf("неизвестный символ %s в позиции %d", string(l.Ch), l.Position)
 		}
 	}
 
 	return tokens, nil
 }
 
-// Получение текущего символа и переход к следующему
-func (l *Lexer) next() rune {
-	currentCh := l.Ch
+// Переход к следующей руне
+func (l *Lexer) next() {
+	l.Position++
 
-	var width int
-    currentCh, width = utf8.DecodeRuneInString(l.Input[l.Position:]) // Декодируем руну
-
-	l.Position += width
-
-	if l.Position >= len(l.Input) {
+	if l.Position >= len(l.Sql) {
 		l.Ch = 0
 	} else {
-		l.Ch, _ = utf8.DecodeRuneInString(l.Input[l.Position:])
+		l.Ch = l.Sql[l.Position]
 	}
-
-	return currentCh
-}
-
-// Получение текущего символа
-func (l *Lexer) current() rune {
-	return l.Ch
 }
 
 // Проверка текущего символа на пробел
 func (l *Lexer) isSpace() bool {
-	return unicode.IsSpace(l.current())
+	return unicode.IsSpace(l.Ch)
 }
 
 // Проверка текущего символа на конец строки
 func (l *Lexer) isLineFeed() bool {
-	return l.current() == '\n'
+	return l.Ch == '\n'
 }
 
-// Проверка текущего символа на строку
+// Проверка текущей руны на строку
 func (l *Lexer) isString() bool {
-	return unicode.IsLetter(l.current())
+	return unicode.IsLetter(l.Ch)
 }
 
-// Проверка текущего символа на число
+// Проверка текущей руны на число
 func (l *Lexer) isDigit() bool {
-	return unicode.IsDigit(l.current())
+	return unicode.IsDigit(l.Ch)
 }
 
-// Проверка текущего символа на оператор
+// Проверка текущей руны на оператор
 func (l *Lexer) isOperator() bool {
-	return constants.Operators[string(l.current())]
+	return constants.Operators[string(l.Ch)]
 }
 
-// Проверка текущего символа на символ
+// Проверка текущей руны на символ
 func (l *Lexer) isSymbol() bool {
-	return constants.Symbols[string(l.current())]
+	return constants.Symbols[string(l.Ch)]
 }
 
-// Проверка текущего символа на одинарную кавычку (в них строковые литералы)
+// Проверка текущей руны на одинарную кавычку (в них строковые литералы)
 func (l *Lexer) isStringLiteral() bool {
-	return l.current() == '\''
+	return l.Ch == '\''
 }
 
-// Проверка текущего символа дефис (с него начинаются комментарии)
+// Проверка текущей руны дефис (с него начинаются комментарии)
 func (l *Lexer) isDashSymbol() bool {
-	return l.current() == '-'
+	return l.Ch == '-'
 }
 
-// Проверка текущего символа на обратный апостроф 
+// Проверка текущей руны на обратный апостроф
 func (l *Lexer) isBacktick() bool {
-	return l.current() == '`'
+	return l.Ch == '`'
 }
 
-// Проверка текущего символа на конец строки
+// Проверка текущей руны на конец строки
 func (l *Lexer) isEnd() bool {
-	return l.current() == 0
+	return l.Ch == 0
 }
 
 // Получение строкового токена
 func (l *Lexer) getStringToken() Token {
 	var builder strings.Builder
 
-	for l.isString() || l.current() == '_' {
-		builder.WriteRune(l.next())
+	for l.isString() || l.Ch == '_' {
+		builder.WriteRune(l.Ch)
+		l.next()
 	}
 
 	result := builder.String()
@@ -205,7 +193,8 @@ func (l *Lexer) getStringLiteralToken() (Token, error) {
 			break
 		}
 
-		builder.WriteRune(l.next())
+		builder.WriteRune(l.Ch)
+		l.next()
 	}
 
 	if !hasEndStringLiteral {
@@ -253,7 +242,8 @@ func (l *Lexer) getBacktickToken() (Token, error) {
 			break
 		}
 
-		builder.WriteRune(l.next())
+		builder.WriteRune(l.Ch)
+		l.next()
 	}
 
 	if !hasEndBacktick {
@@ -271,7 +261,8 @@ func (l *Lexer) getDigitToken() Token {
 	var builder strings.Builder
 
 	for l.isDigit() {
-		builder.WriteRune(l.next())
+		builder.WriteRune(l.Ch)
+		l.next()
 	}
 
 	return Token{
@@ -285,7 +276,8 @@ func (l *Lexer) getOperatorToken() Token {
 	var builder strings.Builder
 
 	for l.isOperator() {
-		builder.WriteRune(l.next())
+		builder.WriteRune(l.Ch)
+		l.next()
 	}
 
 	return Token{
@@ -296,28 +288,36 @@ func (l *Lexer) getOperatorToken() Token {
 
 // Получение токена символа
 func (l *Lexer) getSymbolToken() Token {
-	return Token{
+	token := Token{
 		Type:  constants.TYPE_SYMBOL,
-		Value: string(l.next()),
+		Value: string(l.Ch),
 	}
+
+	l.next()
+
+	return token
 }
 
 // Очистка от комментариев
-func (l *Lexer) clearComment() error {
+func (l *Lexer) clearComment() (bool, error) {
+	if !l.isDashSymbol() {
+		return false, nil
+	}
+
 	l.next()
 
 	if !l.isDashSymbol() {
-		return fmt.Errorf("неверный формат комментариев")
+		return false, fmt.Errorf("неверный формат комментариев")
 	}
 
 	l.next()
 
 	if l.isLineFeed() {
-		return nil
+		return true, nil
 	}
 
-	if l.current() != ' ' {
-		return fmt.Errorf("неверный формат комментариев, отсутствует пробел")
+	if l.Ch != ' ' {
+		return false, fmt.Errorf("неверный формат комментариев, отсутствует пробел")
 	}
 
 	for {
@@ -328,5 +328,5 @@ func (l *Lexer) clearComment() error {
 		l.next()
 	}
 
-	return nil
+	return true, nil
 }
