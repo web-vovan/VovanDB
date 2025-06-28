@@ -6,12 +6,19 @@ import (
 	"unicode"
 	"vovanDB/internal/constants"
 	"vovanDB/internal/helpers"
+
+	_ "github.com/k0kubun/pp"
 )
 
 type Lexer struct {
 	Sql      []rune // запрос для лексического анализа
 	Ch       rune   // текущий символ
 	Position int    // текущая позиция
+}
+
+type Token struct {
+	Type  int
+	Value string
 }
 
 func NewLexer(input string) *Lexer {
@@ -41,11 +48,11 @@ func (l *Lexer) Analyze() ([]Token, error) {
 		}
 
 		// Пропускаем комментарии
-		isClearComment, err := l.clearComment()
+		hasClearComment, err := l.clearComment()
 		if err != nil {
 			return nil, err
 		}
-		if isClearComment {
+		if hasClearComment {
 			continue
 		}
 
@@ -76,6 +83,8 @@ func (l *Lexer) Analyze() ([]Token, error) {
 		}
 	}
 
+	// pp.Print(tokens)
+	
 	return tokens, nil
 }
 
