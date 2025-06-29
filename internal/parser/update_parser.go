@@ -8,7 +8,7 @@ import (
 type UpdateValue struct {
 	ColumnName string
 	Value      string
-	Type       int
+	Type       string
 }
 
 type UpdateQuery struct {

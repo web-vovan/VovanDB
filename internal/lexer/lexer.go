@@ -17,7 +17,7 @@ type Lexer struct {
 }
 
 type Token struct {
-	Type  int
+	Type  string
 	Value string
 }
 
@@ -84,7 +84,7 @@ func (l *Lexer) Analyze() ([]Token, error) {
 	}
 
 	// pp.Print(tokens)
-	
+
 	return tokens, nil
 }
 
@@ -160,19 +160,19 @@ func (l *Lexer) getStringToken() Token {
 
 	result := builder.String()
 
-	var tokenType int
+	var tokenType string
 
 	if constants.Keywords[strings.ToUpper(result)] {
-		tokenType = constants.TYPE_KEYWORD
+		tokenType = constants.TOKEN_KEYWORD
 		result = strings.ToUpper(result)
 	} else if constants.Bools[strings.ToLower(result)] {
-		tokenType = constants.TYPE_BOOL
+		tokenType = constants.TOKEN_BOOL
 		result = strings.ToLower(result)
 	} else if constants.Null[strings.ToUpper(result)] {
-		tokenType = constants.TYPE_NULL
+		tokenType = constants.TOKEN_NULL
 		result = strings.ToUpper(result)
 	} else {
-		tokenType = constants.TYPE_IDENTIFIER
+		tokenType = constants.TOKEN_IDENTIFIER
 	}
 
 	return Token{
@@ -212,20 +212,20 @@ func (l *Lexer) getStringLiteralToken() (Token, error) {
 
 	if helpers.IsValidDate(builder.String()) {
 		return Token{
-			Type:  constants.TYPE_DATE,
+			Type:  constants.TOKEN_DATE,
 			Value: builder.String(),
 		}, nil
 	}
 
 	if helpers.IsValidDatetime(builder.String()) {
 		return Token{
-			Type:  constants.TYPE_DATETIME,
+			Type:  constants.TOKEN_DATETIME,
 			Value: builder.String(),
 		}, nil
 	}
 
 	return Token{
-		Type:  constants.TYPE_STRING,
+		Type:  constants.TOKEN_STRING,
 		Value: builder.String(),
 	}, nil
 }
@@ -260,7 +260,7 @@ func (l *Lexer) getBacktickToken() (Token, error) {
 	}
 
 	return Token{
-		Type:  constants.TYPE_IDENTIFIER,
+		Type:  constants.TOKEN_IDENTIFIER,
 		Value: builder.String(),
 	}, nil
 }
@@ -275,7 +275,7 @@ func (l *Lexer) getDigitToken() Token {
 	}
 
 	return Token{
-		Type:  constants.TYPE_DIGIT,
+		Type:  constants.TOKEN_DIGIT,
 		Value: builder.String(),
 	}
 }
@@ -290,7 +290,7 @@ func (l *Lexer) getOperatorToken() Token {
 	}
 
 	return Token{
-		Type:  constants.TYPE_OPERATOR,
+		Type:  constants.TOKEN_OPERATOR,
 		Value: builder.String(),
 	}
 }
@@ -298,7 +298,7 @@ func (l *Lexer) getOperatorToken() Token {
 // Получение токена символа
 func (l *Lexer) getSymbolToken() Token {
 	token := Token{
-		Type:  constants.TYPE_SYMBOL,
+		Type:  constants.TOKEN_SYMBOL,
 		Value: string(l.Ch),
 	}
 

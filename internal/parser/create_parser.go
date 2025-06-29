@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"strings"
 	"vovanDB/internal/constants"
+
+	_ "github.com/k0kubun/pp"
 )
 
 type CreateColumn struct {
 	Name string
-	Type int
+	Type string
 	AutoIncrement bool
 	NotNull bool
 }
@@ -16,14 +18,6 @@ type CreateColumn struct {
 type CreateQuery struct {
 	Table   string
 	Columns []CreateColumn
-}
-
-func (q CreateQuery) String() string {
-	return fmt.Sprintf("Table: %s\nColumns: %s\n", q.Table, q.Columns)
-}
-
-func (c CreateColumn) String() string {
-	return fmt.Sprintf("\nName: %s\nType: %s\nAutoIncrement: %t\nNotNull: %t", c.Name, constants.TypeNames[c.Type], c.AutoIncrement, c.NotNull)
 }
 
 func (q CreateQuery) QueryType() string {
@@ -118,9 +112,8 @@ func (p *Parser) getCreateColumn() (CreateColumn, error) {
     
     typeText := strings.ToUpper(p.next().Value)
 
-    columnType := constants.ColumnTypes[typeText]
-
-    if columnType == 0 {
+    columnType, ok := constants.ColumnTypes[typeText]
+    if !ok {
         return nilCreateColumn, fmt.Errorf("ошибка в структуре create, не удалось определить тип для колонки %s", p.current().Value)
     }
 

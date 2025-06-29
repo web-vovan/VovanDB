@@ -138,8 +138,8 @@ func ValidateCreateQuery(s parser.CreateQuery) error {
 
 	// Проверка типа колонки с auto_increment
 	for _, column := range s.Columns {
-		if column.AutoIncrement && column.Type != constants.TYPE_DIGIT {
-			return fmt.Errorf("колонка %s с типом %s не может иметь атрибут auto_increment", column.Name, constants.TypeNames[column.Type])
+		if column.AutoIncrement && column.Type != constants.COLUMN_INT {
+			return fmt.Errorf("колонка %s с типом %s не может иметь атрибут auto_increment", column.Name, column.Type)
 		}
 	}
 
@@ -220,15 +220,20 @@ func ValidateInsertQuery(s parser.InsertQuery) error {
 		for j, value := range rowValues {
 			schemaColumn := (*schema.Columns)[mapColumns[j]]
 
-			if !schemaColumn.NotNull && value.Type == constants.TYPE_NULL {
+			if !schemaColumn.NotNull && value.Type == constants.TOKEN_NULL {
 				continue
 			}
 
-			if schemaColumn.NotNull && value.Type == constants.TYPE_NULL {
+			if schemaColumn.NotNull && value.Type == constants.TOKEN_NULL {
 				return fmt.Errorf("запрос невалиден, в строке %d не может быть принят null ", i+1)
 			}
 
-			if value.Type != (*schema.Columns)[mapColumns[j]].Type {
+			columnType, ok := constants.TokenToColumn[value.Type]
+			if !ok {
+				return fmt.Errorf("запрос невалиден, тип %s не поддерживается", value.Type)
+			}
+
+			if columnType != (*schema.Columns)[mapColumns[j]].Type {
 				return fmt.Errorf("запрос невалиден, в строке %d неверный тип ", i+1)
 			}
 		}
@@ -303,20 +308,24 @@ func ValidateConditions(schema schema.TableSchema, conditions []condition.Condit
 	// Сравниваем типы в where
 	for _, c := range conditions {
 		schemaColumn, err := schema.GetColumn(c.Column)
-
 		if err != nil {
 			return err
 		}
 
-		if !schemaColumn.NotNull && c.ValueType == constants.TYPE_NULL {
+		if !schemaColumn.NotNull && c.ValueType == constants.TOKEN_NULL {
 			continue
 		}
 
-		if schemaColumn.NotNull && c.ValueType == constants.TYPE_NULL {
+		if schemaColumn.NotNull && c.ValueType == constants.TOKEN_NULL {
 			return fmt.Errorf("для колонки %s в условии where не может быть установлен null", c.Column)
 		}
 
-		if schemaColumn.Type != c.ValueType {
+		columnType, ok := constants.TokenToColumn[c.ValueType]
+		if !ok {
+			return fmt.Errorf("тип колонки %s в условии where не поддерживается", c.ValueType)
+		}
+
+		if columnType != schemaColumn.Type {
 			return fmt.Errorf("неверный тип колонки %s в условии where", c.Column)
 		}
 	}

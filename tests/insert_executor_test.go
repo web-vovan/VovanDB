@@ -19,7 +19,6 @@ func TestInsertExecutor(t *testing.T) {
 	defer testHelpers.ClearAllTestDatabase()
 
 	err := testHelpers.CreateTestDataBase()
-
 	if err != nil {
 		t.Error(err)
 		return

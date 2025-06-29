@@ -67,7 +67,7 @@ func selectExecutor(s parser.SelectQuery) (string, error) {
 		orderFieldIndex, _ := tableSchema.GetColumnIndex(s.Sorting.Field)
 
 		sort.Slice(filterData, func(i, j int) bool {
-			if orderField.Type == constants.TYPE_DIGIT {
+			if orderField.Type == constants.COLUMN_INT {
 				num1, _ := strconv.Atoi(filterData[i][orderFieldIndex])
 				num2, _ := strconv.Atoi(filterData[j][orderFieldIndex])
 
@@ -106,8 +106,8 @@ func selectExecutor(s parser.SelectQuery) (string, error) {
 
 			schemaColumn := (*tableSchema.Columns)[j]
 
-			if schemaColumn.Type == constants.TYPE_DIGIT ||
-				schemaColumn.Type == constants.TYPE_BOOL ||
+			if schemaColumn.Type == constants.COLUMN_INT ||
+				schemaColumn.Type == constants.COLUMN_BOOL ||
 				(!schemaColumn.NotNull && data == "NULL") {
 				builder.WriteString("\"" + (*tableSchema.Columns)[j].Name + "\"" + ":" + data)
 			} else {

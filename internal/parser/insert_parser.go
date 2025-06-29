@@ -5,7 +5,7 @@ import (
 )
 
 type InsertValue struct {
-	Type int
+	Type string
 	Value string
 }
 
