@@ -153,7 +153,7 @@ func (l *Lexer) isEnd() bool {
 func (l *Lexer) getStringToken() Token {
 	var builder strings.Builder
 
-	for l.isString() || l.Ch == '_' {
+	for l.isString() || l.isDigit() || l.Ch == '_' || l.Ch == '-' {
 		builder.WriteRune(l.Ch)
 		l.next()
 	}
@@ -309,14 +309,16 @@ func (l *Lexer) getSymbolToken() Token {
 
 // Очистка от комментариев
 func (l *Lexer) clearComment() (bool, error) {
+	// Комментарий должен начинаться с символа "-"
 	if !l.isDashSymbol() {
 		return false, nil
 	}
 
 	l.next()
 
+	// У комментария должно в начала быть два символа "-"
 	if !l.isDashSymbol() {
-		return false, fmt.Errorf("неверный формат комментариев")
+		return false, fmt.Errorf("неверный формат комментариев, ожидается '-- some comment'")
 	}
 
 	l.next()
@@ -325,8 +327,9 @@ func (l *Lexer) clearComment() (bool, error) {
 		return true, nil
 	}
 
+	// После символов "--" должен быть пробел
 	if l.Ch != ' ' {
-		return false, fmt.Errorf("неверный формат комментариев, отсутствует пробел")
+		return false, fmt.Errorf("неверный формат комментариев, отсутствует пробел, ожидается '-- some comment'")
 	}
 
 	for {

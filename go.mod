@@ -3,6 +3,7 @@ module vovanDB
 go 1.23.4
 
 require (
+	github.com/google/go-cmp v0.7.0
 	github.com/joho/godotenv v1.5.1
 	github.com/k0kubun/pp v3.0.1+incompatible
 )
