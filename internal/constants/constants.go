@@ -87,8 +87,3 @@ var Symbols = map[string]bool{
 	")": true,
 	";": true,
 }
-
-// NULL
-var Null = map[string]bool{
-	"NULL": true,
-}

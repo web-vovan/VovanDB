@@ -121,12 +121,14 @@ func (l *Lexer) isDigit() bool {
 
 // Проверка текущей руны на оператор
 func (l *Lexer) isOperator() bool {
-	return constants.Operators[string(l.Ch)]
+	_, ok := constants.Operators[string(l.Ch)]
+	return ok
 }
 
 // Проверка текущей руны на символ
 func (l *Lexer) isSymbol() bool {
-	return constants.Symbols[string(l.Ch)]
+	_, ok := constants.Symbols[string(l.Ch)]
+	return ok
 }
 
 // Проверка текущей руны на одинарную кавычку (в них строковые литералы)
@@ -159,24 +161,32 @@ func (l *Lexer) getStringToken() Token {
 	}
 
 	result := builder.String()
+	resultToUpper := strings.ToUpper(result)
+	resultToLower := strings.ToLower(result)
 
-	var tokenType string
+	if _, ok := constants.Keywords[resultToUpper]; ok {
+		return Token{
+			Type:  constants.TOKEN_KEYWORD,
+			Value: resultToUpper,
+		}
+	}
 
-	if constants.Keywords[strings.ToUpper(result)] {
-		tokenType = constants.TOKEN_KEYWORD
-		result = strings.ToUpper(result)
-	} else if constants.Bools[strings.ToLower(result)] {
-		tokenType = constants.TOKEN_BOOL
-		result = strings.ToLower(result)
-	} else if constants.Null[strings.ToUpper(result)] {
-		tokenType = constants.TOKEN_NULL
-		result = strings.ToUpper(result)
-	} else {
-		tokenType = constants.TOKEN_IDENTIFIER
+	if resultToLower == "null" {
+		return Token{
+			Type:  constants.TOKEN_NULL,
+			Value: resultToLower,
+		}
+	}
+
+	if _, ok := constants.Bools[resultToLower]; ok {
+		return Token{
+			Type:   constants.TOKEN_BOOL,
+			Value: resultToLower,
+		}
 	}
 
 	return Token{
-		Type:  tokenType,
+		Type:   constants.TOKEN_IDENTIFIER,
 		Value: result,
 	}
 }
@@ -207,7 +217,7 @@ func (l *Lexer) getStringLiteralToken() (Token, error) {
 	}
 
 	if !hasEndStringLiteral {
-		return Token{}, fmt.Errorf("отсутствует закрывающая кавычка для строки")
+		return Token{}, fmt.Errorf("отсутствует закрывающая одиночная кавычка \"'\" для строки")
 	}
 
 	if helpers.IsValidDate(builder.String()) {
